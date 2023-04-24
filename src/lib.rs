@@ -4,13 +4,14 @@
 //!
 //! The aim is to use this library in a decentralized setting, hence the *local* part in the name. Each robot should hold its own version of the map, upon which it can make decisions. Synchronizing of the maps across robots is outside the scope of this library; this one merely provides a basis on which to get started.
 
+mod cell_map;
 mod coords;
 mod polygon_map;
-mod cell_map;
 
-pub use coords::Coords;
-pub use polygon_map::PolygonMap;
 pub use cell_map::CellMap;
+pub use coords::Coords;
+use matrix::Element;
+pub use polygon_map::PolygonMap;
 
 /// Visualize a map.
 pub trait Visualize {
@@ -50,6 +51,7 @@ pub trait Mask {
 /// Describe states of locations in the map.
 ///
 /// For example, in the case of a [`CellMap`] it allows indicating what the state of each cell is. The [`Mask`] trait allows filtering of the map according to these states.
+#[derive(PartialEq, Copy, Clone)]
 pub enum MapState {
     /// Indicates the location is outside the map region (mostly relevant for non-square maps such as those which can be produced by [`PolygonMap`])
     OutOfMap,
@@ -65,6 +67,13 @@ pub enum MapState {
     Frontier,
     /// Indicates the location is assigned to the current robot
     Assigned,
+}
+
+impl Element for MapState {
+    /// [Zero Element](https://en.wikipedia.org/wiki/Zero_element) should be [`MapState::Unexplored`] as we can assume the area to be unknown at first.
+    fn zero() -> Self {
+        MapState::Unexplored
+    }
 }
 
 #[cfg(test)]
