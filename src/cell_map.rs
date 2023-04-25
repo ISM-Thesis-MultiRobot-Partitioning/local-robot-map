@@ -1,4 +1,4 @@
-use crate::{Coords, MapState};
+use crate::{Coords, MapState, CellMapSize};
 use matrix::{prelude::Conventional, Size};
 
 /// Describe a map using a 2D grid of cells.
@@ -78,24 +78,6 @@ impl Size for CellMap {
     }
     fn columns(&self) -> usize {
         self.cells.columns()
-    }
-}
-
-/// Struct to holding a pair of numbers implementing the [`Size`] trait.
-struct CellMapSize<'a> {
-    p1: &'a Coords,
-    p2: &'a Coords,
-    resolution: f64,
-}
-
-impl Size for CellMapSize<'_> {
-    fn rows(&self) -> usize {
-        let width = (self.p1.x - self.p2.x).abs();
-        (width * self.resolution) as usize
-    }
-    fn columns(&self) -> usize {
-        let height = (self.p1.y - self.p2.y).abs();
-        (height * self.resolution) as usize
     }
 }
 

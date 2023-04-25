@@ -21,7 +21,7 @@ mod polygon_map;
 
 pub use cell_map::CellMap;
 pub use coords::Coords;
-use matrix::Element;
+use matrix::{Element, Size};
 pub use polygon_map::PolygonMap;
 
 /// Visualize a map.
@@ -97,6 +97,24 @@ impl Element for MapState {
     /// unknown at first.
     fn zero() -> Self {
         MapState::Unexplored
+    }
+}
+
+/// Struct to holding a pair of numbers implementing the [`Size`] trait.
+struct CellMapSize<'a> {
+    p1: &'a Coords,
+    p2: &'a Coords,
+    resolution: f64,
+}
+
+impl Size for CellMapSize<'_> {
+    fn rows(&self) -> usize {
+        let width = (self.p1.x - self.p2.x).abs();
+        (width * self.resolution) as usize
+    }
+    fn columns(&self) -> usize {
+        let height = (self.p1.y - self.p2.y).abs();
+        (height * self.resolution) as usize
     }
 }
 
