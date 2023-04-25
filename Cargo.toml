@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 matrix = "0.22.0"
+geo = "0.24.1"
+geo-rasterize = "0.1.2"
