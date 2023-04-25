@@ -96,3 +96,136 @@ impl Size for CellMapSize<'_> {
         (height * self.resolution) as usize
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_cell_map_one_by_one() {
+        let map = CellMap::new(Coords::new(0.0, 0.0, 0.0), Coords::new(1.0, 1.0, 0.0), 1.0);
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0
+            }
+        );
+    }
+
+    #[test]
+    fn create_cell_map_one_by_one_negative() {
+        let map = CellMap::new(
+            Coords::new(0.0, 0.0, 0.0),
+            Coords::new(-1.0, -1.0, 0.0),
+            1.0,
+        );
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: -1.0,
+                y: -1.0,
+                z: 0.0
+            }
+        );
+    }
+
+    #[test]
+    fn create_cell_map_offset() {
+        let (x, y) = (14.26, 95.21);
+        let map = CellMap::new(
+            Coords::new(x, y, 0.0),
+            Coords::new(x + 1.0, y + 1.0, 0.0),
+            1.0,
+        );
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
+    }
+
+    #[test]
+    fn create_cell_map_offset_negative() {
+        let (x, y) = (-126.83, -7165.1137);
+        let map = CellMap::new(
+            Coords::new(x, y, 0.0),
+            Coords::new(x + 1.0, y + 1.0, 0.0),
+            1.0,
+        );
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
+    }
+
+    #[test]
+    fn create_cell_map_resolution() {
+        let map = CellMap::new(Coords::new(0.0, 0.0, 0.0), Coords::new(1.0, 1.0, 0.0), 7.0);
+        assert_eq!(map.resolution(), &7.0);
+        assert_eq!(map.dimensions(), (7, 7));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0
+            }
+        );
+    }
+
+    #[test]
+    fn create_cell_map_resolution_negative() {
+        let map = CellMap::new(
+            Coords::new(0.0, 0.0, 0.0),
+            Coords::new(-1.0, -1.0, 0.0),
+            7.0,
+        );
+        assert_eq!(map.resolution(), &7.0);
+        assert_eq!(map.dimensions(), (7, 7));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: -1.0,
+                y: -1.0,
+                z: 0.0
+            }
+        );
+    }
+
+    #[test]
+    fn create_cell_map_dimension() {
+        let map = CellMap::new(Coords::new(1.0, 3.0, 0.0), Coords::new(10.0, 4.0, 0.0), 1.0);
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (9, 1));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: 1.0,
+                y: 3.0,
+                z: 0.0
+            }
+        );
+    }
+
+    #[test]
+    fn create_cell_map_dimension_negative() {
+        let map = CellMap::new(
+            Coords::new(-10.0, -4.0, 0.0),
+            Coords::new(1.0, 3.0, 0.0),
+            1.0,
+        );
+        assert_eq!(map.resolution(), &1.0);
+        assert_eq!(map.dimensions(), (11, 7));
+        assert_eq!(
+            map.offset(),
+            &Coords {
+                x: -10.0,
+                y: -4.0,
+                z: 0.0
+            }
+        );
+    }
+}
