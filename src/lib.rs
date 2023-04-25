@@ -15,6 +15,7 @@ pub use polygon_map::PolygonMap;
 
 /// Visualize a map.
 pub trait Visualize {
+    /// This function should visualize the map using a GUI window.
     fn visualize(&self);
 }
 
@@ -23,6 +24,7 @@ pub trait Visualize {
 /// This trait requires implementing a partitioning algorithm.
 /// Upon calling the `partition()` function, the map will be consumed and a new map with updated information will be returned.
 pub trait Partition {
+    /// Consumes the map to be partitioned, and returns the partitioned version of the map.
     fn partition(self) -> Self;
 }
 
@@ -30,6 +32,7 @@ pub trait Partition {
 ///
 /// Subareas specified through the [`MapState`] enum are automatically implemented. It is only required to provide the `get_map_region()` function.
 pub trait Mask {
+    /// Retrieve a subarea of the map by filtering the locations based on a condition.
     fn get_map_region(&self, f: dyn Fn() -> bool) -> &Self;
     fn get_out_of_map(&self) -> &Self {
         todo!("Implement get_out_of_map");
