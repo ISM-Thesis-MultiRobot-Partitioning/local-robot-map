@@ -40,7 +40,7 @@ impl CellMap {
     /// assert_eq!(map.cells().dimensions(), (3, 6));
     /// ```
     pub fn new(point1: Coords, point2: Coords, resolution: f64) -> Self {
-        let size = MatrixSize {
+        let size = CellMapSize {
             p1: &point1,
             p2: &point2,
             resolution,
@@ -71,13 +71,13 @@ impl CellMap {
 }
 
 /// Struct to holding a pair of numbers implementing the [`Size`] trait.
-struct MatrixSize<'a> {
+struct CellMapSize<'a> {
     p1: &'a Coords,
     p2: &'a Coords,
     resolution: f64,
 }
 
-impl Size for MatrixSize<'_> {
+impl Size for CellMapSize<'_> {
     fn rows(&self) -> usize {
         let width = (self.p1.x - self.p2.x).abs();
         (width * self.resolution) as usize
