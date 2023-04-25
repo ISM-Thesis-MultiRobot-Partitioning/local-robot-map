@@ -1,5 +1,5 @@
-use crate::coords::Coords;
 use crate::cell_map::CellMap;
+use crate::coords::Coords;
 
 /// Describe a map using a polygon.
 ///
@@ -7,8 +7,8 @@ use crate::cell_map::CellMap;
 ///
 /// # Examples
 /// ```
-/// use local_robot_map::PolygonMap;
 /// use local_robot_map::Coords;
+/// use local_robot_map::PolygonMap;
 ///
 /// let p1 = Coords::new(0.0, 0.0, 0.0);
 /// let p2 = Coords::new(1.0, 1.0, 0.0);
@@ -26,7 +26,9 @@ impl PolygonMap {
 
     /// Convert this map to a [`CellMap`].
     ///
-    /// The [`CellMap`] is more straightforward to work with, hence this function allows to easily make the conversion. The [`PolygonMap`] is mostly interesting for specifying a map region.
+    /// The [`CellMap`] is more straightforward to work with, hence this
+    /// function allows to easily make the conversion. The [`PolygonMap`] is
+    /// mostly interesting for specifying a map region.
     pub fn to_cell_map(self) -> CellMap {
         todo!("Implement conversion");
     }

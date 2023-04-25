@@ -3,26 +3,28 @@ use matrix::{prelude::Conventional, Size};
 
 /// Describe a map using a 2D grid of cells.
 ///
-/// Note that only the `x` and `y` components of [`Coords`] are used, and the `z` component will be
-/// ignored.
+/// Note that only the `x` and `y` components of [`Coords`] are used, and the
+/// `z` component will be ignored.
 ///
-/// Another important thing to note is that real-world coordinates are to be provided and output
-/// from the [`CellMap`].
+/// Another important thing to note is that real-world coordinates are to be
+/// provided and output from the [`CellMap`].
 pub struct CellMap {
     /// A matrix representing the cells along with their states.
     cells: Conventional<MapState>,
     /// Cell resolution, assumed in *pixels per meter*.
     resolution: f64,
-    /// Matrices usually cannot have negative indices, which prevents the representation of
-    /// negative real-world coordinates. To this end, an offset is calculated to bring the map's
-    /// bounding box's bottom left corner to `Coords { x: 0.0, y: 0.0, z: 0.0 }`. Even positive
+    /// Matrices usually cannot have negative indices, which prevents the
+    /// representation of negative real-world coordinates. To this end, an
+    /// offset is calculated to bring the map's bounding box's bottom left
+    /// corner to `Coords { x: 0.0, y: 0.0, z: 0.0 }`. Even positive
     /// coordinates will be shifted as a matter of consistency.
     offset: Coords,
 }
 
 impl CellMap {
-    /// Create a new [`CellMap`]. It takes 2 [`Coords`] indicating the square bounding box area.
-    /// The resolution affects how many pixels/cells per meter will be generated.
+    /// Create a new [`CellMap`]. It takes 2 [`Coords`] indicating the square
+    /// bounding box area. The resolution affects how many pixels/cells per
+    /// meter will be generated.
     ///
     /// # Example
     /// ```
@@ -103,7 +105,11 @@ mod tests {
 
     #[test]
     fn create_cell_map_one_by_one() {
-        let map = CellMap::new(Coords::new(0.0, 0.0, 0.0), Coords::new(1.0, 1.0, 0.0), 1.0);
+        let map = CellMap::new(
+            Coords::new(0.0, 0.0, 0.0),
+            Coords::new(1.0, 1.0, 0.0),
+            1.0,
+        );
         assert_eq!(map.resolution(), &1.0);
         assert_eq!(map.dimensions(), (1, 1));
         assert_eq!(
@@ -163,7 +169,11 @@ mod tests {
 
     #[test]
     fn create_cell_map_resolution() {
-        let map = CellMap::new(Coords::new(0.0, 0.0, 0.0), Coords::new(1.0, 1.0, 0.0), 7.0);
+        let map = CellMap::new(
+            Coords::new(0.0, 0.0, 0.0),
+            Coords::new(1.0, 1.0, 0.0),
+            7.0,
+        );
         assert_eq!(map.resolution(), &7.0);
         assert_eq!(map.dimensions(), (7, 7));
         assert_eq!(
@@ -197,7 +207,11 @@ mod tests {
 
     #[test]
     fn create_cell_map_dimension() {
-        let map = CellMap::new(Coords::new(1.0, 3.0, 0.0), Coords::new(10.0, 4.0, 0.0), 1.0);
+        let map = CellMap::new(
+            Coords::new(1.0, 3.0, 0.0),
+            Coords::new(10.0, 4.0, 0.0),
+            1.0,
+        );
         assert_eq!(map.resolution(), &1.0);
         assert_eq!(map.dimensions(), (9, 1));
         assert_eq!(
