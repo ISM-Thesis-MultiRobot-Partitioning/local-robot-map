@@ -70,6 +70,15 @@ impl CellMap {
     }
 }
 
+impl Size for CellMap {
+    fn rows(&self) -> usize {
+        self.cells.rows()
+    }
+    fn columns(&self) -> usize {
+        self.cells.columns()
+    }
+}
+
 /// Struct to holding a pair of numbers implementing the [`Size`] trait.
 struct CellMapSize<'a> {
     p1: &'a Coords,
