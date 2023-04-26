@@ -7,6 +7,55 @@ use crate::{Coords, MapState, MapStateMatrix};
 ///
 /// Another important thing to note is that real-world coordinates are to be
 /// provided and output from the [`CellMap`].
+///
+/// # Example
+///
+/// ```
+/// use local_robot_map::{CellMap, Coords, MapState};
+///
+/// let point1 = Coords::new(-1.0, -2.0, 0.0);
+/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let resolution = 2.0;
+///
+/// let map = CellMap::new(point1, point2, resolution);
+///
+/// assert_eq!(map.resolution(), &2.0);
+/// assert_eq!(map.offset(), &Coords::new(-1.0, -2.0, 0.0));
+/// assert_eq!(map.width(), 3);
+/// assert_eq!(map.height(), 6);
+/// ```
+///
+/// Here is what happens if the cells don't perfectly fit. The width in
+/// this case should be `1.5`, but we cannot have *half a cell*. As you can
+/// see, the value will simply be truncated and removes anything after the
+/// floating point. The resulting imprecision of the map can be remedied by
+/// setting a higher `resolution` like in the previous example.
+///
+/// ```
+/// use local_robot_map::{CellMap, Coords, MapState};
+///
+/// let point1 = Coords::new(-1.0, -2.0, 0.0);
+/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let resolution = 1.0;
+///
+/// let map = CellMap::new(point1, point2, resolution);
+///
+/// assert_eq!(map.width(), 1);
+/// assert_eq!(map.height(), 3);
+/// ```
+///
+/// ```
+/// use local_robot_map::{CellMap, Coords, MapState};
+///
+/// let point1 = Coords::new(-1.0, -2.0, 0.0);
+/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let resolution = 1.0;
+///
+/// let map = CellMap::new(point1, point2, resolution);
+///
+/// assert_eq!(map.width(), 1);
+/// assert_eq!(map.height(), 3);
+/// ```
 pub struct CellMap {
     /// A matrix representing the cells along with their states.
     cells: MapStateMatrix,
@@ -24,23 +73,6 @@ impl CellMap {
     /// Create a new [`CellMap`]. It takes 2 [`Coords`] indicating the square
     /// bounding box area. The resolution affects how many pixels/cells per
     /// meter will be generated.
-    ///
-    /// # Example
-    /// ```
-    /// use local_robot_map::{CellMap, Coords, MapState};
-    /// use matrix::{matrix, Size};
-    ///
-    /// let point1 = Coords::new(-1.0, -2.0, 0.0);
-    /// let point2 = Coords::new(0.5, 1.0, 0.0);
-    /// let resolution = 2.0;
-    ///
-    /// let map = CellMap::new(point1, point2, resolution);
-    ///
-    /// assert_eq!(map.resolution(), &2.0);
-    /// assert_eq!(map.offset(), &Coords::new(-1.0, -2.0, 0.0));
-    /// assert_eq!(map.width(), 6);
-    /// assert_eq!(map.height(), 3);
-    /// ```
     pub fn new(point1: Coords, point2: Coords, resolution: f64) -> Self {
         let columns = (point2.x - point1.x).abs() * resolution;
         let rows = (point2.y - point1.y).abs() * resolution;
@@ -61,6 +93,11 @@ impl CellMap {
         }
     }
 
+    /// Manually create a [`CellMap`] based off an existing matrix.
+    ///
+    /// Note that the values passed on to this function will be taken *as-is*.
+    /// This means that there are no checks to ensure the `resolution` and
+    /// `offset` were correctly specified.
     pub fn from_raster(
         cells: MapStateMatrix,
         resolution: f64,
