@@ -22,10 +22,10 @@ mod polygon_map;
 pub use cell_map::CellMap;
 pub use coords::Coords;
 use image::{ImageBuffer, Pixel};
-use matrix::{prelude::Conventional, Element, Size};
+use ndarray::Array2;
 pub use polygon_map::PolygonMap;
 
-type MapStateMatrix = Conventional<MapState>;
+type MapStateMatrix = Array2<MapState>;
 
 /// Visualize a map.
 pub trait Visualize<P>
@@ -139,33 +139,6 @@ impl MapState {
             MapState::Frontier => Rgb([50, 50, 100]),
             MapState::Assigned => Rgb([255, 255, 0]),
         }
-    }
-}
-
-impl Element for MapState {
-    /// [Zero Element](https://en.wikipedia.org/wiki/Zero_element)
-    /// should be [`MapState::Unexplored`] as we can assume the area to be
-    /// unknown at first.
-    fn zero() -> Self {
-        MapState::Unexplored
-    }
-}
-
-/// Struct to holding a pair of numbers implementing the [`Size`] trait.
-struct CellMapSize<'a> {
-    p1: &'a Coords,
-    p2: &'a Coords,
-    resolution: f64,
-}
-
-impl Size for CellMapSize<'_> {
-    fn rows(&self) -> usize {
-        let width = (self.p1.x - self.p2.x).abs();
-        (width * self.resolution) as usize
-    }
-    fn columns(&self) -> usize {
-        let height = (self.p1.y - self.p2.y).abs();
-        (height * self.resolution) as usize
     }
 }
 

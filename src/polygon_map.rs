@@ -1,7 +1,5 @@
 use geo::BoundingRect;
 use geo_rasterize::BinaryBuilder;
-use matrix::prelude::{Compressed, Conventional};
-use matrix::{Matrix, Size};
 
 use crate::cell_map::CellMap;
 use crate::coords::Coords;
@@ -57,8 +55,8 @@ impl PolygonMap {
     }
 
     /// Internal helper function to convert the polygon to a corresponding
-    /// matrix for use with [`CellMap`]. The function is used by
-    /// [`PolygonMap::to_cell_map`].
+    /// matrix [`MapStateMatrix`] for use with [`CellMap`]. The function should
+    /// be used by [`PolygonMap::to_cell_map`].
     ///
     /// # Panics
     ///
@@ -93,20 +91,10 @@ impl PolygonMap {
             .rasterize(&self.polygon)
             .expect("There should be no NaN of infinite values");
 
-        let mut sparse_matrix = Compressed::zero((width, height));
-        println!("{:?}", sparse_matrix.dimensions());
-        rasterizer
-            .finish()
-            .indexed_iter()
-            .filter(|(_, v)| !**v)
-            .for_each(|((column, row), _)| {
-                // The Zero Element is [`MapState::Unknown`], so we set all
-                // cells outside the polygon to
-                // [`MapState::OutOfMap`].
-                sparse_matrix.set((row, column), MapState::OutOfMap);
-            });
-
-        Conventional::from(sparse_matrix)
+        rasterizer.finish().map(|e| match e {
+            true => MapState::Unexplored,
+            false => MapState::OutOfMap,
+        })
     }
 
     pub fn get_vertices(&self) -> &Vec<Coords> {
@@ -116,9 +104,8 @@ impl PolygonMap {
 
 #[cfg(test)]
 mod tests {
-    use matrix::matrix;
-
     use super::*;
+    use crate::MapState;
 
     #[test]
     fn polygon_map_to_cell_map_positive() {
@@ -128,7 +115,8 @@ mod tests {
         let resolution = 1.0;
         let cellmap = PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
 
-        assert_eq!(cellmap.dimensions(), (8, 4));
+        assert_eq!(cellmap.ncols(), 8);
+        assert_eq!(cellmap.nrows(), 4);
 
         const OOM: MapState = MapState::OutOfMap;
         const UNE: MapState = MapState::Unexplored;

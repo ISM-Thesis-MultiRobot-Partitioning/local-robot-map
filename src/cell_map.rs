@@ -1,5 +1,4 @@
-use crate::{CellMapSize, Coords, MapStateMatrix};
-use matrix::{prelude::Conventional, Size};
+use crate::{Coords, MapState, MapStateMatrix};
 
 /// Describe a map using a 2D grid of cells.
 ///
@@ -39,14 +38,12 @@ impl CellMap {
     ///
     /// assert_eq!(map.resolution(), &2.0);
     /// assert_eq!(map.offset(), &Coords::new(-1.0, -2.0, 0.0));
-    /// assert_eq!(map.cells().dimensions(), (3, 6));
+    /// assert_eq!(map.ncols(), 6);
+    /// assert_eq!(map.nrows(), 3);
     /// ```
     pub fn new(point1: Coords, point2: Coords, resolution: f64) -> Self {
-        let size = CellMapSize {
-            p1: &point1,
-            p2: &point2,
-            resolution,
-        };
+        let columns = (point2.x - point1.x).abs() * resolution;
+        let rows = (point2.y - point1.y).abs() * resolution;
 
         let offset = Coords {
             x: point1.x.min(point2.x),
@@ -55,7 +52,10 @@ impl CellMap {
         };
 
         Self {
-            cells: Conventional::new(size),
+            cells: MapStateMatrix::from_elem(
+                (rows as usize, columns as usize),
+                MapState::Unexplored,
+            ),
             resolution,
             offset,
         }
@@ -82,14 +82,11 @@ impl CellMap {
     pub fn cells(&self) -> &MapStateMatrix {
         &self.cells
     }
-}
-
-impl Size for CellMap {
-    fn rows(&self) -> usize {
-        self.cells.rows()
+    pub fn ncols(&self) -> usize {
+        self.cells().ncols()
     }
-    fn columns(&self) -> usize {
-        self.cells.columns()
+    pub fn nrows(&self) -> usize {
+        self.cells().nrows()
     }
 }
 
@@ -105,7 +102,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.ncols(), 1);
+        assert_eq!(map.nrows(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -124,7 +122,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.ncols(), 1);
+        assert_eq!(map.nrows(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -144,7 +143,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.ncols(), 1);
+        assert_eq!(map.nrows(), 1);
         assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
     }
 
@@ -157,7 +157,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (1, 1));
+        assert_eq!(map.ncols(), 1);
+        assert_eq!(map.nrows(), 1);
         assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
     }
 
@@ -169,7 +170,8 @@ mod tests {
             7.0,
         );
         assert_eq!(map.resolution(), &7.0);
-        assert_eq!(map.dimensions(), (7, 7));
+        assert_eq!(map.ncols(), 7);
+        assert_eq!(map.nrows(), 7);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -188,7 +190,8 @@ mod tests {
             7.0,
         );
         assert_eq!(map.resolution(), &7.0);
-        assert_eq!(map.dimensions(), (7, 7));
+        assert_eq!(map.ncols(), 7);
+        assert_eq!(map.nrows(), 7);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -207,7 +210,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (9, 1));
+        assert_eq!(map.ncols(), 9);
+        assert_eq!(map.nrows(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -226,7 +230,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.dimensions(), (11, 7));
+        assert_eq!(map.ncols(), 11);
+        assert_eq!(map.nrows(), 7);
         assert_eq!(
             map.offset(),
             &Coords {

@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-matrix = "0.22.0"
+ndarray = "0.15.6"
 geo = "0.24.1"
 geo-rasterize = "0.1.2"
 image = "0.24.6"
