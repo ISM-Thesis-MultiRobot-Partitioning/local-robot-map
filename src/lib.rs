@@ -71,7 +71,7 @@ pub trait Mask {
 /// For example, in the case of a [`CellMap`] it allows indicating what the
 /// state of each cell is. The [`Mask`] trait allows filtering of the map
 /// according to these states.
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum MapState {
     /// Indicates the location is outside the map region (mostly relevant for
     /// non-square maps such as those which can be produced by [`PolygonMap`])
