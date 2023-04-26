@@ -21,15 +21,36 @@ mod polygon_map;
 
 pub use cell_map::CellMap;
 pub use coords::Coords;
-use matrix::{Element, Size, prelude::Conventional};
+use image::{ImageBuffer, Pixel};
+use matrix::{prelude::Conventional, Element, Size};
 pub use polygon_map::PolygonMap;
 
 type MapStateMatrix = Conventional<MapState>;
 
 /// Visualize a map.
-pub trait Visualize {
+pub trait Visualize<P>
+where
+    P: Pixel,
+{
+    /// Convert the map to an [`image::ImageBuffer`].
+    ///
+    /// # Usage
+    ///
+    /// - This can be used to save the map to a file.
+    /// ```
+    /// self.as_image().save("map.png");
+    /// ```
+    /// - Provides an easier to work with interface for inspecting the map (the
+    ///   matrices tend to have quirks that can make it less intuitive)
+    ///
+    /// The function's return type is taken from [`image::ImageBuffer::new`].
+    fn as_image(&self) -> ImageBuffer<P, Vec<P::Subpixel>>;
     /// This function should visualize the map using a GUI window.
-    fn visualize(&self);
+    ///
+    /// Should provide a default implementation using [`Visualize::as_image`]
+    fn visualize(&self) {
+        todo!("How to display images using a GUI window?");
+    }
 }
 
 /// Partitiong the map.
@@ -91,6 +112,34 @@ pub enum MapState {
     Frontier,
     /// Indicates the location is assigned to the current robot
     Assigned,
+}
+
+impl MapState {
+    pub fn color_luma(&self) -> image::Luma<u8> {
+        use image::Luma;
+        match self {
+            MapState::OutOfMap => Luma([0]),
+            MapState::OtherRobot => Luma([40]),
+            MapState::MyRobot => Luma([50]),
+            MapState::Explored => Luma([180]),
+            MapState::Unexplored => Luma([120]),
+            MapState::Frontier => Luma([220]),
+            MapState::Assigned => Luma([255]),
+        }
+    }
+
+    pub fn color_rgb(&self) -> image::Rgb<u8> {
+        use image::Rgb;
+        match self {
+            MapState::OutOfMap => Rgb([0, 0, 0]),
+            MapState::OtherRobot => Rgb([50, 255, 50]),
+            MapState::MyRobot => Rgb([255, 50, 50]),
+            MapState::Explored => Rgb([200, 200, 200]),
+            MapState::Unexplored => Rgb([100, 100, 100]),
+            MapState::Frontier => Rgb([50, 50, 100]),
+            MapState::Assigned => Rgb([255, 255, 0]),
+        }
+    }
 }
 
 impl Element for MapState {
