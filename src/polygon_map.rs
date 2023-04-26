@@ -129,4 +129,16 @@ mod tests {
         let cellmap = polygon.to_cell_map(resolution);
         println!("{:?}", cellmap.cells());
     }
+
+    #[test]
+    fn polygon_map_to_cell_map_negative() {
+        todo!("Check if conversion works if polygon's vertices only have negative coordinates");
+    }
+
+    #[test]
+    fn polygon_map_to_cell_map_partly_negative() {
+        todo!(
+            "Check if conversion works if some of the polygon's vertices have negative coordinates"
+        );
+    }
 }
