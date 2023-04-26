@@ -114,17 +114,34 @@ impl PolygonMap {
 
 #[cfg(test)]
 mod tests {
+    use matrix::matrix;
+
     use super::*;
 
     #[test]
-    fn polygon_map_to_cell_map() {
+    fn polygon_map_to_cell_map_positive() {
         let p1 = Coords::new(0.0, 0.0, 0.0);
-        let p2 = Coords::new(1.0, 1.0, 0.0);
-        let p3 = Coords::new(2.0, 0.0, 0.0);
-        let polygon = PolygonMap::new(vec![p1, p2, p3]);
+        let p2 = Coords::new(4.0, 4.0, 0.0);
+        let p3 = Coords::new(8.0, 0.0, 0.0);
         let resolution = 1.0;
-        let cellmap = polygon.to_cell_map(resolution);
-        println!("{:?}", cellmap.cells());
+        let cellmap = PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+
+        assert_eq!(cellmap.dimensions(), (8, 4));
+
+        const OOM: MapState = MapState::OutOfMap;
+        const UNE: MapState = MapState::Unexplored;
+        assert_eq!(
+            cellmap.cells(),
+            &Conventional::from_vec(
+                (4, 2),
+                matrix![
+                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM;
+                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM;
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM;
+                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE;
+                ]
+            )
+        )
     }
 
     #[test]
