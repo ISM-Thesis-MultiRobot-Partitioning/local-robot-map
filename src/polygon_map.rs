@@ -122,15 +122,15 @@ mod tests {
         const UNE: MapState = MapState::Unexplored;
         assert_eq!(
             cellmap.cells(),
-            &Conventional::from_vec(
+            MapStateMatrix::from_shape_vec(
                 (4, 2),
-                matrix![
-                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM;
-                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM;
-                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM;
-                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE;
+                vec![
+                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM,
+                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM,
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM,
+                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE,
                 ]
-            )
+            ).unwrap()
         )
     }
 
