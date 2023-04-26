@@ -21,6 +21,7 @@ mod polygon_map;
 
 pub use cell_map::CellMap;
 pub use coords::Coords;
+
 use image::{ImageBuffer, Pixel};
 use ndarray::Array2;
 pub use polygon_map::PolygonMap;
@@ -36,18 +37,30 @@ where
     ///
     /// # Usage
     ///
-    /// - This can be used to save the map to a file.
-    /// ```
-    /// self.as_image().save("map.png");
-    /// ```
-    /// - Provides an easier to work with interface for inspecting the map (the
-    ///   matrices tend to have quirks that can make it less intuitive)
+    /// - This can be used to save the map to a file (using
+    ///   [`image::ImageBuffer::save`]).
+    /// - Provides an easier to work with interface for inspecting the map
+    ///   (matrices tend to have quirks which can make them less intuitive).
     ///
     /// The function's return type is taken from [`image::ImageBuffer::new`].
-    fn as_image(&self) -> ImageBuffer<P, Vec<P::Subpixel>>;
-    /// This function should visualize the map using a GUI window.
     ///
-    /// Should provide a default implementation using [`Visualize::as_image`]
+    /// # Implementation tip
+    ///
+    /// Check out the [`MapState::color_luma`] and [`MapState::color_rgb`]
+    /// functions. They provide a central method for converting the
+    /// [`MapState`] variants to colors that can be used by the
+    /// [`ImageBuffer`] being output in this function.
+    fn as_image(&self) -> ImageBuffer<P, Vec<P::Subpixel>>;
+    /// Visualize the map using a GUI window.
+    ///
+    /// # Panics
+    ///
+    /// As of now, **no implementation is given**. Attempting to call
+    /// the function will panic due to a `todo!` macro. Writing the image to a
+    /// file appears to be the more straigthforward way to do display it.
+    ///
+    /// Future note: this function should make use of [`Visualize::as_image`].
+    /// This allows providing a default implementation.
     fn visualize(&self) {
         todo!("How to display images using a GUI window?");
     }
@@ -59,31 +72,40 @@ where
 /// Upon calling the `partition()` function, the map will be consumed and a new
 /// map with updated information will be returned.
 pub trait Partition {
-    /// Consumes the map to be partitioned, and returns the partitioned version
-    /// of the map.
+    /// Consumes the map and returns the partitioned version thereof.
     fn partition(self) -> Self;
 }
 
 /// Retrieve a subarea of the map.
 ///
 /// Subareas specified through the [`MapState`] enum are automatically
-/// implemented. It is only required to provide the `get_map_region()` function.
+/// implemented. It is only required to implement the `get_map_region()`
+/// function.
+///
+/// Note that [`MapState::MyRobot`] and [`MapState::OtherRobot`] are not
+/// provided as they should be taken from the [`LocalMap::my_position`] and
+/// [`LocalMap::other_positions`] functions respectively.
 pub trait Mask {
     /// Retrieve a subarea of the map by filtering the locations based on a
     /// condition.
     fn get_map_region(&self, f: dyn Fn() -> bool) -> &Self;
+    /// Retrieve cells containing [`MapState::OutOfMap`].
     fn get_out_of_map(&self) -> &Self {
         todo!("Implement get_out_of_map");
     }
+    /// Retrieve cells containing [`MapState::Explored`].
     fn get_explored(&self) -> &Self {
         todo!("Implement get_explored");
     }
+    /// Retrieve cells containing [`MapState::Unexplored`].
     fn get_unexplored(&self) -> &Self {
         todo!("Implement get_unexplored");
     }
+    /// Retrieve cells containing [`MapState::Frontier`].
     fn get_frontier(&self) -> &Self {
         todo!("Implement get_frontier");
     }
+    /// Retrieve cells containing [`MapState::Assigned`].
     fn get_assigned(&self) -> &Self {
         todo!("Implement get_assigned");
     }
@@ -115,6 +137,10 @@ pub enum MapState {
 }
 
 impl MapState {
+    /// Returns a corresponding [`image::Luma`] of the [`MapState`].
+    ///
+    /// This is useful when trying to visualize the map. Can be
+    /// used when implementing [`Visualize::as_image`].
     pub fn color_luma(&self) -> image::Luma<u8> {
         use image::Luma;
         match self {
@@ -128,6 +154,10 @@ impl MapState {
         }
     }
 
+    /// Returns a corresponding [`image::Rgb`] of the [`MapState`].
+    ///
+    /// This is useful when trying to visualize the map. Can be
+    /// used when implementing [`Visualize::as_image`].
     pub fn color_rgb(&self) -> image::Rgb<u8> {
         use image::Rgb;
         match self {
