@@ -21,8 +21,10 @@ mod polygon_map;
 
 pub use cell_map::CellMap;
 pub use coords::Coords;
-use matrix::{Element, Size};
+use matrix::{Element, Size, prelude::Conventional};
 pub use polygon_map::PolygonMap;
+
+type MapStateMatrix = Conventional<MapState>;
 
 /// Visualize a map.
 pub trait Visualize {

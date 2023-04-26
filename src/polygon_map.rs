@@ -5,7 +5,7 @@ use matrix::{Matrix, Size};
 
 use crate::cell_map::CellMap;
 use crate::coords::Coords;
-use crate::MapState;
+use crate::{MapState, MapStateMatrix};
 
 /// Describe a map using a polygon.
 ///
@@ -75,7 +75,7 @@ impl PolygonMap {
     ///   there are NaN of infinite values.
     /// - The rasterization itself can panic as well if there are NaN of
     ///   infinite values.
-    fn rasterize_polygon(&self, resolution: f64) -> Conventional<MapState> {
+    fn rasterize_polygon(&self, resolution: f64) -> MapStateMatrix {
         let bbox = match self.polygon.bounding_rect() {
             Some(b) => b,
             None => panic!("No bounding box for polygon"),

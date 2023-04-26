@@ -1,4 +1,4 @@
-use crate::{CellMapSize, Coords, MapState};
+use crate::{CellMapSize, Coords, MapStateMatrix};
 use matrix::{prelude::Conventional, Size};
 
 /// Describe a map using a 2D grid of cells.
@@ -10,7 +10,7 @@ use matrix::{prelude::Conventional, Size};
 /// provided and output from the [`CellMap`].
 pub struct CellMap {
     /// A matrix representing the cells along with their states.
-    cells: Conventional<MapState>,
+    cells: MapStateMatrix,
     /// Cell resolution, assumed in *pixels per meter*.
     resolution: f64,
     /// Matrices usually cannot have negative indices, which prevents the
@@ -62,7 +62,7 @@ impl CellMap {
     }
 
     pub fn from_raster(
-        cells: Conventional<MapState>,
+        cells: MapStateMatrix,
         resolution: f64,
         offset: Coords,
     ) -> Self {
@@ -79,7 +79,7 @@ impl CellMap {
     pub fn offset(&self) -> &Coords {
         &self.offset
     }
-    pub fn cells(&self) -> &Conventional<MapState> {
+    pub fn cells(&self) -> &MapStateMatrix {
         &self.cells
     }
 }
