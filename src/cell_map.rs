@@ -1,4 +1,4 @@
-use crate::{Coords, MapState, CellMapSize};
+use crate::{CellMapSize, Coords, MapState};
 use matrix::{prelude::Conventional, Size};
 
 /// Describe a map using a 2D grid of cells.
