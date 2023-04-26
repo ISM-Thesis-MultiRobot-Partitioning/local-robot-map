@@ -38,8 +38,8 @@ impl CellMap {
     ///
     /// assert_eq!(map.resolution(), &2.0);
     /// assert_eq!(map.offset(), &Coords::new(-1.0, -2.0, 0.0));
-    /// assert_eq!(map.ncols(), 6);
-    /// assert_eq!(map.nrows(), 3);
+    /// assert_eq!(map.width(), 6);
+    /// assert_eq!(map.height(), 3);
     /// ```
     pub fn new(point1: Coords, point2: Coords, resolution: f64) -> Self {
         let columns = (point2.x - point1.x).abs() * resolution;
@@ -88,6 +88,12 @@ impl CellMap {
     pub fn nrows(&self) -> usize {
         self.cells().nrows()
     }
+    pub fn width(&self) -> usize {
+        self.ncols()
+    }
+    pub fn height(&self) -> usize {
+        self.nrows()
+    }
 }
 
 #[cfg(test)]
@@ -102,8 +108,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 1);
-        assert_eq!(map.nrows(), 1);
+        assert_eq!(map.width(), 1);
+        assert_eq!(map.height(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -122,8 +128,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 1);
-        assert_eq!(map.nrows(), 1);
+        assert_eq!(map.width(), 1);
+        assert_eq!(map.height(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -143,8 +149,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 1);
-        assert_eq!(map.nrows(), 1);
+        assert_eq!(map.width(), 1);
+        assert_eq!(map.height(), 1);
         assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
     }
 
@@ -157,8 +163,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 1);
-        assert_eq!(map.nrows(), 1);
+        assert_eq!(map.width(), 1);
+        assert_eq!(map.height(), 1);
         assert_eq!(map.offset(), &Coords { x, y, z: 0.0 });
     }
 
@@ -170,8 +176,8 @@ mod tests {
             7.0,
         );
         assert_eq!(map.resolution(), &7.0);
-        assert_eq!(map.ncols(), 7);
-        assert_eq!(map.nrows(), 7);
+        assert_eq!(map.width(), 7);
+        assert_eq!(map.height(), 7);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -190,8 +196,8 @@ mod tests {
             7.0,
         );
         assert_eq!(map.resolution(), &7.0);
-        assert_eq!(map.ncols(), 7);
-        assert_eq!(map.nrows(), 7);
+        assert_eq!(map.width(), 7);
+        assert_eq!(map.height(), 7);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -210,8 +216,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 9);
-        assert_eq!(map.nrows(), 1);
+        assert_eq!(map.width(), 9);
+        assert_eq!(map.height(), 1);
         assert_eq!(
             map.offset(),
             &Coords {
@@ -230,8 +236,8 @@ mod tests {
             1.0,
         );
         assert_eq!(map.resolution(), &1.0);
-        assert_eq!(map.ncols(), 11);
-        assert_eq!(map.nrows(), 7);
+        assert_eq!(map.width(), 11);
+        assert_eq!(map.height(), 7);
         assert_eq!(
             map.offset(),
             &Coords {
