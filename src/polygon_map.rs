@@ -5,7 +5,7 @@ use matrix::{Matrix, Size};
 
 use crate::cell_map::CellMap;
 use crate::coords::Coords;
-use crate::{CellMapSize, MapState};
+use crate::MapState;
 
 /// Describe a map using a polygon.
 ///
