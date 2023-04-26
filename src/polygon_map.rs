@@ -44,15 +44,15 @@ impl PolygonMap {
     ///
     /// The `resolution` parameter specify the pixels per meter.
     pub fn to_cell_map(self, resolution: f64) -> CellMap {
-        CellMap {
-            cells: self.rasterize_polygon(resolution),
+        CellMap::from_raster(
+            self.rasterize_polygon(resolution),
             resolution,
-            offset: Coords {
+            Coords {
                 x: 0.0,
                 y: 0.0,
                 z: 0.0,
             },
-        }
+        )
     }
 
     /// .

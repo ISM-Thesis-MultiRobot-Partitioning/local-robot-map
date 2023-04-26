@@ -61,6 +61,18 @@ impl CellMap {
         }
     }
 
+    pub fn from_raster(
+        cells: Conventional<MapState>,
+        resolution: f64,
+        offset: Coords,
+    ) -> Self {
+        Self {
+            cells,
+            resolution,
+            offset,
+        }
+    }
+
     pub fn resolution(&self) -> &f64 {
         &self.resolution
     }
