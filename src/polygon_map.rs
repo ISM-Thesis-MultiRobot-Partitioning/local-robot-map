@@ -56,7 +56,9 @@ impl PolygonMap {
         )
     }
 
-    /// .
+    /// Internal helper function to convert the polygon to a corresponding
+    /// matrix for use with [`CellMap`]. The function is used by
+    /// [`PolygonMap::to_cell_map`].
     ///
     /// # Panics
     ///
