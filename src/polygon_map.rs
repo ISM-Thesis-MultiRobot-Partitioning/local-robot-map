@@ -18,6 +18,12 @@ use crate::{MapState, MapStateMatrix};
 /// let p2 = Coords::new(1.0, 1.0, 0.0);
 /// let p3 = Coords::new(2.0, 0.0, 0.0);
 /// let polygon = PolygonMap::new(vec![p1, p2, p3]);
+///
+/// assert_eq!(polygon.vertices(), &vec![
+///     Coords::new(0.0, 0.0, 0.0),
+///     Coords::new(1.0, 1.0, 0.0),
+///     Coords::new(2.0, 0.0, 0.0),
+/// ]);
 /// ```
 pub struct PolygonMap {
     vertices: Vec<Coords>,
@@ -97,7 +103,7 @@ impl PolygonMap {
         })
     }
 
-    pub fn get_vertices(&self) -> &Vec<Coords> {
+    pub fn vertices(&self) -> &Vec<Coords> {
         &self.vertices
     }
 }
@@ -107,30 +113,34 @@ mod tests {
     use super::*;
     use crate::MapState;
 
+    const OOM: MapState = MapState::OutOfMap;
+    const UNE: MapState = MapState::Unexplored;
+
     #[test]
     fn polygon_map_to_cell_map_positive() {
         let p1 = Coords::new(0.0, 0.0, 0.0);
         let p2 = Coords::new(4.0, 4.0, 0.0);
         let p3 = Coords::new(8.0, 0.0, 0.0);
+
         let resolution = 1.0;
-        let cellmap = PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+        let cellmap: CellMap =
+            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
 
-        assert_eq!(cellmap.ncols(), 8);
-        assert_eq!(cellmap.nrows(), 4);
+        assert_eq!(cellmap.width(), 8);
+        assert_eq!(cellmap.height(), 4);
 
-        const OOM: MapState = MapState::OutOfMap;
-        const UNE: MapState = MapState::Unexplored;
         assert_eq!(
             cellmap.cells(),
             MapStateMatrix::from_shape_vec(
-                (4, 2),
+                (cellmap.nrows(), cellmap.ncols()),
                 vec![
-                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM,
-                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM,
-                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM,
-                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE,
+                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM, //
+                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM, //
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM, //
+                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
                 ]
-            ).unwrap()
+            )
+            .unwrap()
         )
     }
 
