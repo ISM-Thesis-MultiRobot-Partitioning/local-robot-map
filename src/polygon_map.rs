@@ -1,6 +1,7 @@
 use geo::BoundingRect;
 use geo_rasterize::BinaryBuilder;
-use matrix::prelude::Conventional;
+use matrix::prelude::{Compressed, Conventional};
+use matrix::{Matrix, Size};
 
 use crate::cell_map::CellMap;
 use crate::coords::Coords;
@@ -80,34 +81,30 @@ impl PolygonMap {
         let width = (bbox.width() * resolution) as usize;
         let height = (bbox.height() * resolution) as usize;
 
-        let mut r = BinaryBuilder::new()
+        let mut rasterizer = BinaryBuilder::new()
             .width(width)
             .height(height)
             .build()
             .expect("There should be no NaN or infinite values among the polygon vertices");
-        r.rasterize(&self.polygon)
+
+        rasterizer
+            .rasterize(&self.polygon)
             .expect("There should be no NaN of infinite values");
 
-        let pixels = r.finish();
-        // - to_vec
-        // - filter on bool values
-        // - create sparse matrix
-        // - convert to cell map
+        let mut sparse_matrix = Compressed::zero((width, height));
+        println!("{:?}", sparse_matrix.dimensions());
+        rasterizer
+            .finish()
+            .indexed_iter()
+            .filter(|(_, v)| !**v)
+            .for_each(|((column, row), _)| {
+                // The Zero Element is [`MapState::Unknown`], so we set all
+                // cells outside the polygon to
+                // [`MapState::OutOfMap`].
+                sparse_matrix.set((row, column), MapState::OutOfMap);
+            });
 
-        let size = CellMapSize {
-            p1: &Coords {
-                x: bbox.min().x,
-                y: bbox.min().y,
-                z: 0.0,
-            },
-            p2: &Coords {
-                x: bbox.max().x,
-                y: bbox.max().y,
-                z: 0.0,
-            },
-            resolution,
-        };
-        let cells = Conventional::new(size);
+        Conventional::from(sparse_matrix)
     }
 
     pub fn get_vertices(&self) -> &Vec<Coords> {
