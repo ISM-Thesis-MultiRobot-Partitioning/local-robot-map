@@ -74,8 +74,8 @@ impl CellMap {
     /// bounding box area. The resolution affects how many pixels/cells per
     /// meter will be generated.
     pub fn new(point1: Coords, point2: Coords, resolution: f64) -> Self {
-        let columns = (point2.x - point1.x).abs() * resolution;
-        let rows = (point2.y - point1.y).abs() * resolution;
+        let columns = point1.distance_x(&point2) * resolution;
+        let rows = point1.distance_y(&point2) * resolution;
 
         let offset = Coords {
             x: point1.x.min(point2.x),
