@@ -1,4 +1,4 @@
-use geo::BoundingRect;
+use geo::{BoundingRect, MapCoords};
 use geo_rasterize::BinaryBuilder;
 use num::ToPrimitive;
 
@@ -90,6 +90,11 @@ impl PolygonMap {
         };
         let width = bbox.width() * resolution;
         let height = bbox.height() * resolution;
+        let polygon =
+            self.polygon.map_coords(|geo::Coord { x, y }| geo::Coord {
+                x: x * resolution,
+                y: y * resolution,
+            });
 
         let mut rasterizer = BinaryBuilder::new()
             .width(width.to_usize().expect("No conversion issues"))
@@ -98,7 +103,7 @@ impl PolygonMap {
             .expect("There should be no NaN or infinite values among the polygon vertices");
 
         rasterizer
-            .rasterize(&self.polygon)
+            .rasterize(&polygon)
             .expect("There should be no NaN of infinite values");
 
         rasterizer.finish().map(|e| match e {
