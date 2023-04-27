@@ -1,4 +1,5 @@
 use crate::{Coords, MapState, MapStateMatrix};
+use num::cast::ToPrimitive;
 
 /// Describe a map using a 2D grid of cells.
 ///
@@ -85,7 +86,10 @@ impl CellMap {
 
         Self {
             cells: MapStateMatrix::from_elem(
-                (rows as usize, columns as usize),
+                (
+                    rows.to_usize().expect("No conversion issues"),
+                    columns.to_usize().expect("No conversion issues"),
+                ),
                 MapState::Unexplored,
             ),
             resolution,

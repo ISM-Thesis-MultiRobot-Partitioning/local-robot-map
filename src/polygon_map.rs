@@ -1,5 +1,6 @@
 use geo::BoundingRect;
 use geo_rasterize::BinaryBuilder;
+use num::ToPrimitive;
 
 use crate::cell_map::CellMap;
 use crate::coords::Coords;
@@ -84,12 +85,12 @@ impl PolygonMap {
             Some(b) => b,
             None => panic!("No bounding box for polygon"),
         };
-        let width = (bbox.width() * resolution) as usize;
-        let height = (bbox.height() * resolution) as usize;
+        let width = bbox.width() * resolution;
+        let height = bbox.height() * resolution;
 
         let mut rasterizer = BinaryBuilder::new()
-            .width(width)
-            .height(height)
+            .width(width.to_usize().expect("No conversion issues"))
+            .height(height.to_usize().expect("No conversion issues"))
             .build()
             .expect("There should be no NaN or infinite values among the polygon vertices");
 
