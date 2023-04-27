@@ -100,3 +100,109 @@ impl Coords {
         .sqrt()
     }
 }
+
+/// Struct specifiying the *resolution* (i.e. how many pixels) per axis.
+///
+/// See also: [`Polygon::to_cell_map`] and [`CellMap::new`].
+///
+/// # Example
+///
+/// To illustrate, we shall ignore the `z` component and pretend we are working
+/// in 2D space.
+///
+/// The following means we have one pixel per square meter.
+///
+/// ```
+/// use local_robot_map::{AxisResolution, CellMap, Coords};
+///
+/// let map = CellMap::new(
+///     Coords::new(0.0, 0.0, 0.0),
+///     Coords::new(1.0, 1.0, 0.0),
+///     AxisResolution::uniform(1.0),
+/// );
+/// assert_eq!(map.width(), 1);
+/// assert_eq!(map.height(), 1);
+/// ```
+///
+/// The following means we have four pixels per square meter. We have 2 pixels
+/// along the `x` axis, and 2 pixels along the `y` axis, which will subdivide
+/// the square into 4.
+///
+/// ```
+/// use local_robot_map::{AxisResolution, CellMap, Coords};
+///
+/// let map = CellMap::new(
+///     Coords::new(0.0, 0.0, 0.0),
+///     Coords::new(1.0, 1.0, 0.0),
+///     AxisResolution::uniform(2.0),
+/// );
+/// assert_eq!(map.width(), 2);
+/// assert_eq!(map.height(), 2);
+/// ```
+///
+/// The following means we have one pixel per meter on the X axis, and 10 pixels
+/// per meter on the Y axis.
+///
+/// ```
+/// use local_robot_map::{AxisResolution, CellMap, Coords};
+///
+/// let map = CellMap::new(
+///     Coords::new(0.0, 0.0, 0.0),
+///     Coords::new(1.0, 1.0, 0.0),
+///     AxisResolution::new(1.0, 10.0, 0.0),
+/// );
+/// assert_eq!(map.width(), 1);
+/// assert_eq!(map.height(), 10);
+/// ```
+#[derive(Debug, PartialEq)]
+pub struct AxisResolution {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
+
+impl AxisResolution {
+    /// Create an [`AxisResolution`]
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use local_robot_map::AxisResolution;
+    /// let resolution = AxisResolution::new(1.0, 2.0, 3.0);
+    /// assert_eq!(
+    ///     resolution,
+    ///     AxisResolution {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     }
+    /// );
+    /// ```
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { x, y, z }
+    }
+
+    /// Create [`AxisResolution`] with the same resolution for each axis
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use local_robot_map::AxisResolution;
+    /// let resolution = AxisResolution::uniform(1.0);
+    /// assert_eq!(
+    ///     resolution,
+    ///     AxisResolution {
+    ///         x: 1.0,
+    ///         y: 1.0,
+    ///         z: 1.0
+    ///     }
+    /// );
+    /// ```
+    pub fn uniform(resolution: f64) -> Self {
+        Self {
+            x: resolution,
+            y: resolution,
+            z: resolution,
+        }
+    }
+}

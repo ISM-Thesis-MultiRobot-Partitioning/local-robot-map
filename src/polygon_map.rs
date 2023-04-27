@@ -3,7 +3,7 @@ use geo_rasterize::BinaryBuilder;
 use num::ToPrimitive;
 
 use crate::cell_map::CellMap;
-use crate::coords::Coords;
+use crate::coords::{AxisResolution, Coords};
 use crate::{MapState, MapStateMatrix};
 
 /// Describe a map using a polygon.
@@ -51,10 +51,11 @@ impl PolygonMap {
     /// function allows to easily make the conversion. The [`PolygonMap`] is
     /// mostly interesting for specifying a map region.
     ///
-    /// The `resolution` parameter specify the pixels per meter.
-    pub fn to_cell_map(self, resolution: f64) -> CellMap {
+    /// The `resolution` is used to impact the size/dimension of the
+    /// [`CellMap`]. See also [`AxisResolution`].
+    pub fn to_cell_map(self, resolution: AxisResolution) -> CellMap {
         CellMap::from_raster(
-            self.rasterize_polygon(resolution),
+            self.rasterize_polygon(&resolution),
             resolution,
             Coords {
                 x: 0.0,
@@ -83,17 +84,17 @@ impl PolygonMap {
     ///   there are NaN of infinite values.
     /// - The rasterization itself can panic as well if there are NaN of
     ///   infinite values.
-    fn rasterize_polygon(&self, resolution: f64) -> MapStateMatrix {
+    fn rasterize_polygon(&self, resolution: &AxisResolution) -> MapStateMatrix {
         let bbox = match self.polygon.bounding_rect() {
             Some(b) => b,
             None => panic!("No bounding box for polygon"),
         };
-        let width = bbox.width() * resolution;
-        let height = bbox.height() * resolution;
+        let width = bbox.width() * resolution.x;
+        let height = bbox.height() * resolution.y;
         let polygon =
             self.polygon.map_coords(|geo::Coord { x, y }| geo::Coord {
-                x: x * resolution,
-                y: y * resolution,
+                x: x * resolution.x,
+                y: y * resolution.y,
             });
 
         let mut rasterizer = BinaryBuilder::new()
@@ -131,7 +132,7 @@ mod tests {
         let p2 = Coords::new(4.0, 4.0, 0.0);
         let p3 = Coords::new(8.0, 0.0, 0.0);
 
-        let resolution = 1.0;
+        let resolution = AxisResolution::uniform(1.0);
         let cellmap: CellMap =
             PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
 

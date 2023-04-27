@@ -21,6 +21,7 @@ mod polygon_map;
 
 pub use cell_map::CellMap;
 pub use coords::Coords;
+pub use coords::AxisResolution;
 
 use image::{ImageBuffer, Pixel};
 use ndarray::Array2;
