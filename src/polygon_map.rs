@@ -31,14 +31,14 @@ pub struct PolygonMap {
 }
 
 impl PolygonMap {
-    pub fn new(vertices: Vec<Coords>) -> PolygonMap {
+    pub fn new(vertices: Vec<Coords>) -> Self {
         let polygon = geo::Polygon::new(
             geo::LineString::from(
                 vertices.iter().map(|e| (e.x, e.y)).collect::<Vec<_>>(),
             ),
             vec![],
         );
-        PolygonMap { vertices, polygon }
+        Self { vertices, polygon }
     }
 
     /// Convert this map to a [`CellMap`].
