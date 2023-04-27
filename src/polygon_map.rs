@@ -20,11 +20,14 @@ use crate::{MapState, MapStateMatrix};
 /// let p3 = Coords::new(2.0, 0.0, 0.0);
 /// let polygon = PolygonMap::new(vec![p1, p2, p3]);
 ///
-/// assert_eq!(polygon.vertices(), &vec![
-///     Coords::new(0.0, 0.0, 0.0),
-///     Coords::new(1.0, 1.0, 0.0),
-///     Coords::new(2.0, 0.0, 0.0),
-/// ]);
+/// assert_eq!(
+///     polygon.vertices(),
+///     &vec![
+///         Coords::new(0.0, 0.0, 0.0),
+///         Coords::new(1.0, 1.0, 0.0),
+///         Coords::new(2.0, 0.0, 0.0),
+///     ]
+/// );
 /// ```
 pub struct PolygonMap {
     vertices: Vec<Coords>,
