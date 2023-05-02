@@ -1,4 +1,6 @@
-use crate::{AxisResolution, Coords, MapState, MapStateMatrix, Visualize};
+use crate::{
+    AxisResolution, Coords, MapState, MapStateMatrix, Mask, Visualize,
+};
 use num::cast::ToPrimitive;
 
 use image::{ImageBuffer, RgbImage};
@@ -167,8 +169,50 @@ impl Visualize for CellMap {
     }
 }
 
+impl Mask for CellMap {
+    type CellType = MapState;
+
+    fn get_map_region(
+        &self,
+        filter: impl Fn(Self::CellType) -> bool,
+    ) -> Vec<Cell> {
+        self.cells
+            .indexed_iter()
+            .filter(|((_, _), e)| filter(**e))
+            .map(|((row, col), e)| Cell::new(col, row, e))
+            .collect()
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Cell<'a> {
+    x: usize,
+    y: usize,
+    value: &'a MapState,
+}
+
+impl<'a> Cell<'a> {
+    pub fn new(x: usize, y: usize, value: &'a MapState) -> Self {
+        Self { x, y, value }
+    }
+
+    pub fn x(&self) -> usize {
+        self.x
+    }
+    pub fn y(&self) -> usize {
+        self.y
+    }
+    pub fn value(&self) -> &'a MapState {
+        self.value
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
+    use crate::MaskMapState;
+
     use super::*;
 
     #[test]
@@ -372,6 +416,132 @@ mod tests {
                 y: -4.0,
                 z: 0.0
             }
+        );
+    }
+
+    fn make_map() -> CellMap {
+        let ms = HashMap::from([
+            ("OOM", MapState::OutOfMap),
+            ("OTR", MapState::OtherRobot),
+            ("MYR", MapState::MyRobot),
+            ("EXP", MapState::Explored),
+            ("UNE", MapState::Unexplored),
+            ("FNT", MapState::Frontier),
+            ("ASS", MapState::Assigned),
+        ]);
+
+
+        CellMap::from_raster(
+            MapStateMatrix::from_shape_vec(
+                (5, 3),
+                vec![
+                    *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), *ms.get("MYR").unwrap(), //
+                    *ms.get("FNT").unwrap(), *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), //
+                    *ms.get("ASS").unwrap(), *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), //
+                    *ms.get("MYR").unwrap(), *ms.get("UNE").unwrap(), *ms.get("ASS").unwrap(), //
+                    *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), *ms.get("FNT").unwrap(), //
+                ],
+            )
+            .unwrap(),
+            AxisResolution::uniform(1.0),
+            Coords::new(0.0, 0.0, 0.0),
+        )
+    }
+
+    #[test]
+    fn submap_get_map_region() {
+        let map = make_map();
+
+        let cells = map.get_map_region(|e| e == MapState::OutOfMap);
+
+        assert_eq!(cells.len(), 2);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(0, 0, &MapState::OutOfMap),
+                Cell::new(1, 2, &MapState::OutOfMap),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_out_of_map() {
+        let map = make_map();
+
+        let cells = map.get_map_state(MapState::OutOfMap);
+
+        assert_eq!(cells.len(), 2);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(0, 0, &MapState::OutOfMap),
+                Cell::new(1, 2, &MapState::OutOfMap),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_explored() {
+        let map = make_map();
+
+        let cells = map.get_map_state(MapState::Explored);
+
+        assert_eq!(cells.len(), 2);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(2, 1, &MapState::Explored),
+                Cell::new(1, 4, &MapState::Explored),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_unexplored() {
+        let map = make_map();
+
+        let cells = map.get_map_state(MapState::Unexplored);
+
+        assert_eq!(cells.len(), 3);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(1, 1, &MapState::Unexplored),
+                Cell::new(1, 3, &MapState::Unexplored),
+                Cell::new(0, 4, &MapState::Unexplored),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_frontier() {
+        let map = make_map();
+
+        let cells = map.get_map_state(MapState::Frontier);
+
+        assert_eq!(cells.len(), 2);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(0, 1, &MapState::Frontier),
+                Cell::new(2, 4, &MapState::Frontier),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_assigned() {
+        let map = make_map();
+
+        let cells = map.get_map_state(MapState::Assigned);
+
+        assert_eq!(cells.len(), 2);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(0, 2, &MapState::Assigned),
+                Cell::new(2, 3, &MapState::Assigned),
+            ]
         );
     }
 }
