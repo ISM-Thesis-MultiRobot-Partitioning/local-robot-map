@@ -19,6 +19,7 @@ mod cell_map;
 mod coords;
 mod polygon_map;
 
+use cell_map::Cell;
 pub use cell_map::CellMap;
 pub use coords::AxisResolution;
 pub use coords::Coords;
@@ -77,38 +78,32 @@ pub trait Partition {
     fn partition(self) -> Self;
 }
 
-/// Retrieve a subarea of the map.
-///
-/// Subareas specified through the [`MapState`] enum are automatically
-/// implemented. It is only required to implement the `get_map_region()`
-/// function.
-///
-/// Note that [`MapState::MyRobot`] and [`MapState::OtherRobot`] are not
-/// provided as they should be taken from the [`LocalMap::my_position`] and
-/// [`LocalMap::other_positions`] functions respectively.
+/// Retrieve a subarea of the map based on a condition.
 pub trait Mask {
+    /// The Type contained in the map cells
+    type CellType;
     /// Retrieve a subarea of the map by filtering the locations based on a
     /// condition.
-    fn get_map_region(&self, f: dyn Fn() -> bool) -> &Self;
-    /// Retrieve cells containing [`MapState::OutOfMap`].
-    fn get_out_of_map(&self) -> &Self {
-        todo!("Implement get_out_of_map");
-    }
-    /// Retrieve cells containing [`MapState::Explored`].
-    fn get_explored(&self) -> &Self {
-        todo!("Implement get_explored");
-    }
-    /// Retrieve cells containing [`MapState::Unexplored`].
-    fn get_unexplored(&self) -> &Self {
-        todo!("Implement get_unexplored");
-    }
-    /// Retrieve cells containing [`MapState::Frontier`].
-    fn get_frontier(&self) -> &Self {
-        todo!("Implement get_frontier");
-    }
-    /// Retrieve cells containing [`MapState::Assigned`].
-    fn get_assigned(&self) -> &Self {
-        todo!("Implement get_assigned");
+    fn get_map_region(
+        &self,
+        filter: impl Fn(Self::CellType) -> bool,
+    ) -> Vec<Cell>;
+}
+
+/// Retrieve a subarea of the map based on a [`MapState`]
+///
+/// This trait is automatically implemented when [`Mask`] is implemented, and
+/// the type `T` can be compared to a [`MapState`].
+pub trait MaskMapState {
+    fn get_map_state(&self, state: MapState) -> Vec<Cell>;
+}
+
+impl<T: Mask> MaskMapState for T
+where
+    <T as Mask>::CellType: PartialEq<MapState>,
+{
+    fn get_map_state(&self, state: MapState) -> Vec<Cell> {
+        self.get_map_region(|e| e == state)
     }
 }
 
