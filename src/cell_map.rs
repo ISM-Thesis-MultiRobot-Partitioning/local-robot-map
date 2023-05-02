@@ -1,5 +1,7 @@
-use crate::{AxisResolution, Coords, MapState, MapStateMatrix};
+use crate::{AxisResolution, Coords, MapState, MapStateMatrix, Visualize};
 use num::cast::ToPrimitive;
+
+use image::{ImageBuffer, RgbImage};
 
 /// Describe a map using a 2D grid of cells.
 ///
@@ -145,6 +147,23 @@ impl CellMap {
     }
     pub fn height(&self) -> usize {
         self.nrows()
+    }
+}
+
+impl Visualize for CellMap {
+    type ImageType = RgbImage;
+
+    fn as_image(&self) -> Self::ImageType {
+        ImageBuffer::from_fn(
+            self.width().to_u32().expect("No conversion issues"),
+            self.height().to_u32().expect("No conversion issues"),
+            |x, y| -> image::Rgb<_> {
+                let row = y.to_usize().expect("No conversion issues");
+                let col = x.to_usize().expect("No conversion issues");
+                let cell: MapState = self.cells[[row, col]];
+                cell.to_rgb()
+            },
+        )
     }
 }
 
