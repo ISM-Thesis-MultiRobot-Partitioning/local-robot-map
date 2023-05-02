@@ -544,4 +544,10 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn save_map_to_png() {
+        let map = make_map();
+        map.as_image().save("test_save_map.png").unwrap();
+    }
 }
