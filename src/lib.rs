@@ -20,21 +20,23 @@ mod coords;
 mod polygon_map;
 
 pub use cell_map::CellMap;
-pub use coords::Coords;
 pub use coords::AxisResolution;
+pub use coords::Coords;
 
-use image::{ImageBuffer, Pixel};
 use ndarray::Array2;
 pub use polygon_map::PolygonMap;
 
 type MapStateMatrix = Array2<MapState>;
 
 /// Visualize a map.
-pub trait Visualize<P>
-where
-    P: Pixel,
-{
-    /// Convert the map to an [`image::ImageBuffer`].
+pub trait Visualize {
+    /// Type of the image.
+    type ImageType;
+    /// Convert the map to an image.
+    ///
+    /// The [`image::ImageBuffer`] type is an interesting target. Its
+    /// [`Image::ImageBuffer::from_fn`] function allows converting from any
+    /// arbitrary data towards and [`image::ImageBuffer`].
     ///
     /// # Usage
     ///
@@ -43,15 +45,13 @@ where
     /// - Provides an easier to work with interface for inspecting the map
     ///   (matrices tend to have quirks which can make them less intuitive).
     ///
-    /// The function's return type is taken from [`image::ImageBuffer::new`].
-    ///
     /// # Implementation tip
     ///
     /// Check out the [`MapState::color_luma`] and [`MapState::color_rgb`]
     /// functions. They provide a central method for converting the
     /// [`MapState`] variants to colors that can be used by the
     /// [`ImageBuffer`] being output in this function.
-    fn as_image(&self) -> ImageBuffer<P, Vec<P::Subpixel>>;
+    fn as_image(&self) -> Self::ImageType;
     /// Visualize the map using a GUI window.
     ///
     /// # Panics
