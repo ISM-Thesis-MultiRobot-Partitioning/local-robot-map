@@ -142,7 +142,7 @@ impl MapState {
     ///
     /// This is useful when trying to visualize the map. Can be
     /// used when implementing [`Visualize::as_image`].
-    pub fn color_luma(&self) -> image::Luma<u8> {
+    pub fn to_luma(&self) -> image::Luma<u8> {
         use image::Luma;
         match self {
             MapState::OutOfMap => Luma([0]),
@@ -159,7 +159,7 @@ impl MapState {
     ///
     /// This is useful when trying to visualize the map. Can be
     /// used when implementing [`Visualize::as_image`].
-    pub fn color_rgb(&self) -> image::Rgb<u8> {
+    pub fn to_rgb(&self) -> image::Rgb<u8> {
         use image::Rgb;
         match self {
             MapState::OutOfMap => Rgb([0, 0, 0]),
