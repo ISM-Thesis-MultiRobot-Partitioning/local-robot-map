@@ -1,3 +1,4 @@
 /target
 /Cargo.lock
-*.png
+test_save_map.png
+test_save_local_map.jpg

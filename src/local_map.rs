@@ -1,3 +1,5 @@
+use image::RgbImage;
+
 use crate::{Coords, MaskMapState, Partition, Visualize};
 
 pub struct LocalMap<T>
@@ -46,6 +48,17 @@ where
             my_position: self.my_position,
             other_positions: self.other_positions,
         }
+    }
+}
+
+impl<T> Visualize for LocalMap<T>
+where
+    T: Partition + MaskMapState + Visualize,
+{
+    type ImageType = <T as Visualize>::ImageType;
+
+    fn as_image(&self) -> Self::ImageType {
+        self.map.as_image()
     }
 }
 
@@ -131,6 +144,12 @@ mod tests {
     fn call_map_trait_function_visualize() {
         let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
         lmap.map().as_image();
+    }
+
+    #[test]
+    fn call_map_trait_function_visualize_and_then_save() {
+        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        lmap.map().as_image().save("test_save_local_map.jpg").unwrap();
     }
 
     #[test]
