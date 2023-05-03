@@ -68,6 +68,7 @@ use image::{ImageBuffer, RgbImage};
 /// assert_eq!(map.width(), 1);
 /// assert_eq!(map.height(), 3);
 /// ```
+#[derive(Debug, PartialEq)]
 pub struct CellMap {
     /// A matrix representing the cells along with their states.
     cells: MapStateMatrix,
@@ -208,12 +209,41 @@ impl<'a> Cell<'a> {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use std::collections::HashMap;
 
     use crate::MaskMapState;
 
     use super::*;
+
+    pub fn make_map() -> CellMap {
+        let ms = HashMap::from([
+            ("OOM", MapState::OutOfMap),
+            ("OTR", MapState::OtherRobot),
+            ("MYR", MapState::MyRobot),
+            ("EXP", MapState::Explored),
+            ("UNE", MapState::Unexplored),
+            ("FNT", MapState::Frontier),
+            ("ASS", MapState::Assigned),
+        ]);
+
+
+        CellMap::from_raster(
+            MapStateMatrix::from_shape_vec(
+                (5, 3),
+                vec![
+                    *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), *ms.get("MYR").unwrap(), //
+                    *ms.get("FNT").unwrap(), *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), //
+                    *ms.get("ASS").unwrap(), *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), //
+                    *ms.get("MYR").unwrap(), *ms.get("UNE").unwrap(), *ms.get("ASS").unwrap(), //
+                    *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), *ms.get("FNT").unwrap(), //
+                ],
+            )
+            .unwrap(),
+            AxisResolution::uniform(1.0),
+            Coords::new(0.0, 0.0, 0.0),
+        )
+    }
 
     #[test]
     fn create_cell_map_one_by_one() {
@@ -417,35 +447,6 @@ mod tests {
                 z: 0.0
             }
         );
-    }
-
-    fn make_map() -> CellMap {
-        let ms = HashMap::from([
-            ("OOM", MapState::OutOfMap),
-            ("OTR", MapState::OtherRobot),
-            ("MYR", MapState::MyRobot),
-            ("EXP", MapState::Explored),
-            ("UNE", MapState::Unexplored),
-            ("FNT", MapState::Frontier),
-            ("ASS", MapState::Assigned),
-        ]);
-
-
-        CellMap::from_raster(
-            MapStateMatrix::from_shape_vec(
-                (5, 3),
-                vec![
-                    *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), *ms.get("MYR").unwrap(), //
-                    *ms.get("FNT").unwrap(), *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), //
-                    *ms.get("ASS").unwrap(), *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), //
-                    *ms.get("MYR").unwrap(), *ms.get("UNE").unwrap(), *ms.get("ASS").unwrap(), //
-                    *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), *ms.get("FNT").unwrap(), //
-                ],
-            )
-            .unwrap(),
-            AxisResolution::uniform(1.0),
-            Coords::new(0.0, 0.0, 0.0),
-        )
     }
 
     #[test]

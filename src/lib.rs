@@ -17,6 +17,7 @@
 
 mod cell_map;
 mod coords;
+mod local_map;
 mod polygon_map;
 
 use cell_map::Cell;
@@ -26,6 +27,8 @@ pub use coords::Coords;
 
 use ndarray::Array2;
 pub use polygon_map::PolygonMap;
+
+pub use local_map::LocalMap;
 
 type MapStateMatrix = Array2<MapState>;
 
@@ -73,6 +76,15 @@ pub trait Visualize {
 /// This trait requires implementing a partitioning algorithm.
 /// Upon calling the `partition()` function, the map will be consumed and a new
 /// map with updated information will be returned.
+///
+/// # Intended usage
+///
+/// This is essentially at the heart of what we aimed this implementation
+/// to provide, so no default implementation is given.
+///
+/// The overarching idea was to allow multiple partitioning schemes to be
+/// implemented, which can be done by creating multiple crates/modules which
+/// each implement the partitioning in any way they see fit.
 pub trait Partition {
     /// Consumes the map and returns the partitioned version thereof.
     fn partition(self) -> Self;
