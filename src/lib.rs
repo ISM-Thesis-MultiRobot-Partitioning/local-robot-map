@@ -36,7 +36,7 @@ pub trait Visualize {
     /// Convert the map to an image.
     ///
     /// The [`image::ImageBuffer`] type is an interesting target. Its
-    /// [`Image::ImageBuffer::from_fn`] function allows converting from any
+    /// [`image::ImageBuffer::from_fn`] function allows converting from any
     /// arbitrary data towards and [`image::ImageBuffer`].
     ///
     /// # Usage
@@ -48,10 +48,10 @@ pub trait Visualize {
     ///
     /// # Implementation tip
     ///
-    /// Check out the [`MapState::color_luma`] and [`MapState::color_rgb`]
+    /// Check out the [`MapState::to_luma`] and [`MapState::to_rgb`]
     /// functions. They provide a central method for converting the
     /// [`MapState`] variants to colors that can be used by the
-    /// [`ImageBuffer`] being output in this function.
+    /// [`image::ImageBuffer`] being output in this function.
     fn as_image(&self) -> Self::ImageType;
     /// Visualize the map using a GUI window.
     ///

@@ -103,7 +103,7 @@ impl Coords {
 
 /// Struct specifiying the *resolution* (i.e. how many pixels) per axis.
 ///
-/// See also: [`Polygon::to_cell_map`] and [`CellMap::new`].
+/// See also: [`crate::PolygonMap::to_cell_map`] and [`crate::CellMap::new`].
 ///
 /// # Example
 ///
