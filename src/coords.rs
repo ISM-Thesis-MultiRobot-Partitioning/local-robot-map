@@ -101,6 +101,27 @@ impl Coords {
     }
 }
 
+pub struct RealWorldLocation {
+    location: Coords,
+}
+
+impl RealWorldLocation {
+    pub fn new(location: Coords) -> Self {
+        Self { location }
+    }
+}
+
+struct InternalLocation {
+    location: Coords,
+    offset: Coords,
+}
+
+impl InternalLocation {
+    pub fn new(location: Coords, offset: Coords) -> Self {
+        Self { location, offset }
+    }
+}
+
 /// Struct specifiying the *resolution* (i.e. how many pixels) per axis.
 ///
 /// See also: [`crate::PolygonMap::to_cell_map`] and [`crate::CellMap::new`].

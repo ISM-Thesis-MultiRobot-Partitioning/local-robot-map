@@ -25,6 +25,7 @@ pub use cell_map::CellMap;
 pub use coords::AxisResolution;
 pub use coords::Coords;
 
+use coords::RealWorldLocation;
 use ndarray::Array2;
 pub use polygon_map::PolygonMap;
 
@@ -178,6 +179,57 @@ impl MapState {
             MapState::Assigned => Rgb([255, 255, 0]),
         }
     }
+}
+
+/// Transparently translate between real-world coordinates and internal matrix
+/// coordinates.
+///
+/// It is tricky to make sure we are working in the right coordinate frame.
+/// For the outside world and users, it would ideally be possible to work with
+/// real world coordinates. However, the implementation often requires
+/// converting these coordiantes to an internal reference frame. Hence the need
+/// arises to convert between real-world and internal coordinates.
+///
+/// This trait provides functions that make common actions easier to work with
+/// to the outside world and users. It does so by ensuring that only real-world
+/// coordinates are being input and output from these trait functions. The
+/// functions then take care of transparently converting the coordinates
+/// accordingly.
+pub trait Location {
+    /// The Type contained in the map locations
+    type LocationType;
+    /// Retrieve the value at the given location.
+    ///
+    /// If the location can be successfully accessed, an `Ok(value)` will be
+    /// returned.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if there was an issue accessing the
+    /// location. See [`LocationError`] for details.
+    fn get_location(
+        &self,
+        coord: RealWorldLocation,
+    ) -> Result<Self::LocationType, LocationError>;
+    /// Updates the given location in the map with a new value.
+    ///
+    /// If a value was already present at the given location, it should be
+    /// overwritten by the new value. The function returns `Ok(old_value)`
+    /// if the value was successfully replaced.
+    ///
+    /// # Errors
+    ///
+    /// Same as [`Location::get_location`].
+    fn set_location(
+        &mut self,
+        coord: RealWorldLocation,
+        value: Self::LocationType,
+    ) -> Result<Self::LocationType, LocationError>;
+}
+
+pub enum LocationError {
+    /// The requested location is outside the map area and cannot be accessed.
+    OutOfMap,
 }
 
 #[cfg(test)]
