@@ -20,7 +20,7 @@ mod coords;
 mod local_map;
 mod polygon_map;
 
-use cell_map::Cell;
+pub use cell_map::Cell;
 pub use cell_map::CellMap;
 pub use coords::AxisResolution;
 pub use coords::Coords;
