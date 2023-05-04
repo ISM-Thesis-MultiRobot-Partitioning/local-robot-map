@@ -72,7 +72,7 @@ mod tests {
         }
     }
 
-    fn make_localmap(
+    fn make_random_local_map(
         my_position: Coords,
         other_positions: Vec<Coords>,
     ) -> LocalMap<CellMap> {
@@ -81,30 +81,62 @@ mod tests {
         LocalMap::new(map, my_position, other_positions)
     }
 
+    fn make_local_map(
+        my_position: Coords,
+        other_positions: Vec<Coords>,
+    ) -> LocalMap<CellMap> {
+        LocalMap::new(
+            CellMap::new(
+                Coords::new(0.0, 0.0, 0.0),
+                Coords::new(10.0, 10.0, 10.0),
+                crate::AxisResolution::uniform(1.0),
+            ),
+            my_position,
+            other_positions,
+        )
+    }
+
+    fn get_mapstate_pos_from_map(map: &CellMap, state: MapState) -> Vec<Coords> {
+        map.get_map_state(state)
+            .iter()
+            .map(|cell| Coords::new(cell.x() as f64, cell.y() as f64, 0.0))
+            .collect()
+    }
+
     #[test]
     fn get_my_position() {
         let my_position = Coords::new(0.0, 0.0, 0.0);
         let other_positions = vec![];
 
-        let lmap = make_localmap(my_position, other_positions);
+        let lmap = make_local_map(my_position, other_positions);
+        let my_map_pos: Vec<Coords> = get_mapstate_pos_from_map(lmap.map(), MapState::MyRobot);
 
-        assert_eq!(lmap.my_position(), &Coords::new(0.0, 0.0, 0.0));
+        assert_eq!(my_map_pos.len(), 1, "There should only be 1 position for my robot");
+        assert_eq!(lmap.my_position(), &my_map_pos[0]);
     }
 
     #[test]
     fn create_local_map_other_positions_no_robots() {
         let my_position = Coords::new(0.0, 0.0, 0.0);
         let other_positions = vec![];
-        let lmap = make_localmap(my_position, other_positions);
-        assert_eq!(lmap.other_positions(), &vec![]);
+
+        let lmap = make_local_map(my_position, other_positions);
+        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+
+        assert_eq!(positions.len(), 0, "There should only be no other robots");
+        assert_eq!(lmap.other_positions(), &positions);
     }
 
     #[test]
     fn create_local_map_other_positions_one_robots() {
         let my_position = Coords::new(0.0, 0.0, 0.0);
         let other_positions = vec![Coords::new(1.0, 1.0, 0.0)];
-        let lmap = make_localmap(my_position, other_positions);
-        assert_eq!(lmap.other_positions(), &vec![Coords::new(1.0, 1.0, 0.0)]);
+
+        let lmap = make_local_map(my_position, other_positions);
+        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+
+        assert_eq!(positions.len(), 1, "There should only be 1 other robots");
+        assert_eq!(lmap.other_positions(), &positions);
     }
 
     #[test]
@@ -115,38 +147,35 @@ mod tests {
             Coords::new(2.0, 2.0, 0.0),
             Coords::new(3.0, 3.0, 0.0),
         ];
-        let lmap = make_localmap(my_position, other_positions);
-        assert_eq!(
-            lmap.other_positions(),
-            &vec![
-                Coords::new(1.0, 1.0, 0.0),
-                Coords::new(2.0, 2.0, 0.0),
-                Coords::new(3.0, 3.0, 0.0),
-            ]
-        )
+
+        let lmap = make_local_map(my_position, other_positions);
+        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+
+        assert_eq!(positions.len(), 3, "There should only be 3 other robots");
+        assert_eq!(lmap.other_positions(), &positions);
     }
 
     #[test]
     fn get_map() {
-        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
         assert_eq!(lmap.map(), &make_map());
     }
 
     #[test]
     fn partition_map() {
-        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
         lmap.partition();
     }
 
     #[test]
     fn call_map_trait_function_visualize() {
-        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
         lmap.map().as_image();
     }
 
     #[test]
     fn call_map_trait_function_visualize_and_then_save() {
-        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
         lmap.map()
             .as_image()
             .save("test_save_local_map.jpg")
@@ -155,7 +184,7 @@ mod tests {
 
     #[test]
     fn call_map_trait_function_mask_mapstate() {
-        let lmap = make_localmap(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
         lmap.map().get_map_state(MapState::Unexplored);
     }
 }
