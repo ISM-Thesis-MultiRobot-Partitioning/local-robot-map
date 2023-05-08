@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 /// Create 3D coordinates. Assumes *meter* as the unit of measurement.
 ///
 /// # Examples
@@ -9,7 +11,7 @@
 /// assert_eq!(coords.y, 2.0);
 /// assert_eq!(coords.z, 3.0);
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Coords {
     pub x: f64,
     pub y: f64,
@@ -101,13 +103,70 @@ impl Coords {
     }
 }
 
+impl Add for Coords {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+    }
+}
+
+impl Sub for Coords {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+/// Explicitly describe real world coordinates.
+///
+/// A thin wrapper around [`Coords`] which allows making a clear distinction
+/// between *real world* coordinates, and *internal* ones. Real world
+/// coordinates are what entities outside this crate use.
+///
+/// # Reasoning behind this
+///
+/// Internally, such coordinates are likely to require offsetting due to the
+/// internal data structures. For instance, negative real world coordinates
+/// would lead to negative indexing in the matrix representing the map. While a
+/// custom matrix type could be created for this exact issue, we opted to offset
+/// the coordinates to accomodate for such cases. There are a few other cases
+/// where offsetting takes place internally, but it is outside the scope of this
+/// description.
+///
+/// See [`RealWorldLocation::into_internal`] for more details.
 pub struct RealWorldLocation {
+    /// The location in terms of real world coordinates.
     location: Coords,
 }
 
 impl RealWorldLocation {
     pub fn new(location: Coords) -> Self {
         Self { location }
+    }
+
+    /// Translate from real-world coordinates to internal ones.
+    ///
+    /// # What is happening
+    ///
+    /// To visualize what exactly is happening, consider we draw a bounding box
+    /// around a set of locations. We consider its bottom left corner to
+    /// be the origin of the internal reference frame. Now, the coordinate of
+    /// that origin in the real world reference frame indicates our offset.
+    /// So we can bring the coordinates from the real world reference frame
+    /// into the internal reference frame by translating them using this
+    /// offset.
+    ///
+    /// # Example
+    ///
+    /// Check out the unit tests for examples.
+    fn into_internal(self, offset: Coords) -> InternalLocation {
+        InternalLocation::new(self.location - offset, offset)
+    }
+
+    pub fn location(&self) -> &Coords {
+        &self.location
     }
 }
 
@@ -117,8 +176,35 @@ struct InternalLocation {
 }
 
 impl InternalLocation {
-    pub fn new(location: Coords, offset: Coords) -> Self {
+    /// Creates a new [`InternalLocation`].
+    ///
+    /// # Assumption
+    ///
+    /// The `location` is the already offset coordinate; this function performs
+    /// no calculations. See [`RealWorldLocation::into_internal`] for more
+    /// details.
+    fn new(location: Coords, offset: Coords) -> Self {
         Self { location, offset }
+    }
+
+    /// Translate from internal location back to the original real-world one.
+    fn into_real_world(self) -> RealWorldLocation {
+        RealWorldLocation::new(self.location + self.offset)
+    }
+
+    /// Recompute the internal location given a new offset.
+    ///
+    /// Note that the offset is given in real world coordinates and not relative
+    /// to the existing offset (i.e. you provide the same offset you would
+    /// provide to [`RealWorldLocation::into_internal`]). The implementation
+    /// should take care of calculating the relative offset, and thus alleviate
+    /// the programmer.
+    fn change_offset(self, offset: Coords) -> Self {
+        self.into_real_world().into_internal(offset)
+    }
+
+    fn location(&self) -> &Coords {
+        &self.location
     }
 }
 
@@ -225,5 +311,144 @@ impl AxisResolution {
             y: resolution,
             z: resolution,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Considering the explanation from [`RealWorldLocation::into_internal`],
+    /// we can draw a bounding box around the following locations whose
+    /// origin sits at `(-1.0, -1.0, -1.0)`; this will be our offset into
+    /// internal coordinates.
+    #[test]
+    fn external_to_internal_coords() {
+        let external_locations = vec![
+            RealWorldLocation::new(Coords::new(-1.0, -1.0, -1.0)),
+            RealWorldLocation::new(Coords::new(0.0, 0.0, 0.0)),
+            RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
+        ];
+
+        let internal_locations: Vec<InternalLocation> = external_locations
+            .into_iter()
+            .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+            .collect();
+
+        assert_eq!(
+            internal_locations
+                .iter()
+                .map(|iloc| iloc.location())
+                .collect::<Vec<&Coords>>(),
+            vec![
+                &Coords::new(0.0, 0.0, 0.0),
+                &Coords::new(1.0, 1.0, 1.0),
+                &Coords::new(2.0, 2.0, 2.0),
+            ]
+        )
+    }
+
+    /// Same example as before, but this time we go from the internal back to
+    /// external. Note that the internal coordinates will store the offset
+    /// that they were given, so we need to construct them via the external
+    /// coordinates.
+    #[test]
+    fn internal_to_external_coords() {
+        let internal_locations: Vec<InternalLocation> = vec![
+            RealWorldLocation::new(Coords::new(-1.0, -1.0, -1.0)),
+            RealWorldLocation::new(Coords::new(0.0, 0.0, 0.0)),
+            RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
+        ]
+        .into_iter()
+        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+        .collect();
+
+        let external_locations: Vec<RealWorldLocation> = internal_locations
+            .into_iter()
+            .map(|loc| loc.into_real_world())
+            .collect();
+
+        assert_eq!(
+            external_locations
+                .iter()
+                .map(|loc| loc.location())
+                .collect::<Vec<&Coords>>(),
+            vec![
+                &Coords::new(-1.0, -1.0, -1.0),
+                &Coords::new(0.0, 0.0, 0.0),
+                &Coords::new(1.0, 1.0, 1.0),
+            ]
+        )
+    }
+
+    /// It is possible that internal locations need to be offset to accomodate
+    /// for new locations. This should be a transparent process where one simply
+    /// gives it the new offset in the real world reference frame (the same
+    /// one that would be used to convert from [`RealWorldLocation`] to
+    /// [`InternalLocation`]).
+    #[test]
+    fn internal_new_offset() {
+        let internal_locations: Vec<InternalLocation> = vec![
+            RealWorldLocation::new(Coords::new(-1.0, -1.0, -1.0)),
+            RealWorldLocation::new(Coords::new(0.0, 0.0, 0.0)),
+            RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
+        ]
+        .into_iter()
+        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+        .collect();
+
+        let offset_internal_locations: Vec<InternalLocation> =
+            internal_locations
+                .into_iter()
+                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)))
+                .collect();
+
+        assert_eq!(
+            offset_internal_locations
+                .iter()
+                .map(|iloc| iloc.location())
+                .collect::<Vec<&Coords>>(),
+            vec![
+                &Coords::new(1.0, 1.0, 1.0),
+                &Coords::new(2.0, 2.0, 2.0),
+                &Coords::new(3.0, 3.0, 3.0),
+            ]
+        )
+    }
+
+    #[test]
+    fn internal_new_offset_matches_external() {
+        let internal_locations: Vec<InternalLocation> = vec![
+            RealWorldLocation::new(Coords::new(-1.0, -1.0, -1.0)),
+            RealWorldLocation::new(Coords::new(0.0, 0.0, 0.0)),
+            RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
+        ]
+        .into_iter()
+        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+        .collect();
+
+        let offset_internal_locations: Vec<InternalLocation> =
+            internal_locations
+                .into_iter()
+                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)))
+                .collect();
+
+        let external_locations: Vec<RealWorldLocation> =
+            offset_internal_locations
+                .into_iter()
+                .map(|loc| loc.into_real_world())
+                .collect();
+
+        assert_eq!(
+            external_locations
+                .iter()
+                .map(|loc| loc.location())
+                .collect::<Vec<&Coords>>(),
+            vec![
+                &Coords::new(-1.0, -1.0, -1.0),
+                &Coords::new(0.0, 0.0, 0.0),
+                &Coords::new(1.0, 1.0, 1.0),
+            ]
+        )
     }
 }

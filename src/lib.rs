@@ -25,7 +25,7 @@ pub use cell_map::CellMap;
 pub use coords::AxisResolution;
 pub use coords::Coords;
 
-use coords::RealWorldLocation;
+pub use coords::RealWorldLocation;
 use ndarray::Array2;
 pub use polygon_map::PolygonMap;
 
