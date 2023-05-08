@@ -101,6 +101,16 @@ impl Coords {
             + self.distance_z(other).powi(2))
         .sqrt()
     }
+
+    pub fn x(&self) -> f64 {
+        self.x
+    }
+    pub fn y(&self) -> f64 {
+        self.y
+    }
+    pub fn z(&self) -> f64 {
+        self.z
+    }
 }
 
 impl Add for Coords {
@@ -161,16 +171,25 @@ impl RealWorldLocation {
     /// # Example
     ///
     /// Check out the unit tests for examples.
-    fn into_internal(self, offset: Coords) -> InternalLocation {
+    pub(crate) fn into_internal(self, offset: Coords) -> InternalLocation {
         InternalLocation::new(self.location - offset, offset)
     }
 
     pub fn location(&self) -> &Coords {
         &self.location
     }
+    pub fn x(&self) -> f64 {
+        self.location().x
+    }
+    pub fn y(&self) -> f64 {
+        self.location().y
+    }
+    pub fn z(&self) -> f64 {
+        self.location().z
+    }
 }
 
-struct InternalLocation {
+pub(crate) struct InternalLocation {
     location: Coords,
     offset: Coords,
 }
@@ -183,12 +202,12 @@ impl InternalLocation {
     /// The `location` is the already offset coordinate; this function performs
     /// no calculations. See [`RealWorldLocation::into_internal`] for more
     /// details.
-    fn new(location: Coords, offset: Coords) -> Self {
+    pub(crate) fn new(location: Coords, offset: Coords) -> Self {
         Self { location, offset }
     }
 
     /// Translate from internal location back to the original real-world one.
-    fn into_real_world(self) -> RealWorldLocation {
+    pub(crate) fn into_real_world(self) -> RealWorldLocation {
         RealWorldLocation::new(self.location + self.offset)
     }
 
@@ -199,12 +218,21 @@ impl InternalLocation {
     /// provide to [`RealWorldLocation::into_internal`]). The implementation
     /// should take care of calculating the relative offset, and thus alleviate
     /// the programmer.
-    fn change_offset(self, offset: Coords) -> Self {
+    pub(crate) fn change_offset(self, offset: Coords) -> Self {
         self.into_real_world().into_internal(offset)
     }
 
-    fn location(&self) -> &Coords {
+    pub(crate) fn location(&self) -> &Coords {
         &self.location
+    }
+    pub(crate) fn x(&self) -> f64 {
+        self.location().x
+    }
+    pub(crate) fn y(&self) -> f64 {
+        self.location().y
+    }
+    pub(crate) fn z(&self) -> f64 {
+        self.location().z
     }
 }
 
