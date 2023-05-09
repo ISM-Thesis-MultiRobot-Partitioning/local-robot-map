@@ -233,7 +233,7 @@ impl InternalLocation {
     /// no calculations. See [`RealWorldLocation::into_internal`] for more
     /// details.
     pub(crate) fn new(location: Coords, offset: Coords) -> Option<Self> {
-        if offset.x() >= 0.0 && offset.y() >= 0.0 && offset.z() >= 0.0 {
+        if location.x() >= 0.0 && location.y() >= 0.0 && location.z() >= 0.0 {
             Some(Self { location, offset })
         } else {
             None
