@@ -1,4 +1,4 @@
-use crate::{Coords, MaskMapState, Partition, Visualize, Location};
+use crate::{Coords, Location, MaskMapState, Partition, Visualize};
 
 pub struct LocalMap<T>
 where
@@ -68,7 +68,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cell_map::tests::make_map, CellMap, MapState, RealWorldLocation};
+    use crate::{
+        cell_map::tests::make_map, CellMap, MapState, RealWorldLocation,
+    };
 
     // dummy implementation for testing purposes
     impl Partition for CellMap {
@@ -101,7 +103,10 @@ mod tests {
         )
     }
 
-    fn get_mapstate_pos_from_map(map: &CellMap, state: MapState) -> Vec<Coords> {
+    fn get_mapstate_pos_from_map(
+        map: &CellMap,
+        state: MapState,
+    ) -> Vec<Coords> {
         map.get_map_state(state)
             .iter()
             .map(|cell| Coords::new(*cell.x(), *cell.y(), 0.0))
@@ -114,9 +119,14 @@ mod tests {
         let other_positions = vec![];
 
         let lmap = make_local_map(my_position, other_positions);
-        let my_map_pos: Vec<Coords> = get_mapstate_pos_from_map(lmap.map(), MapState::MyRobot);
+        let my_map_pos: Vec<Coords> =
+            get_mapstate_pos_from_map(lmap.map(), MapState::MyRobot);
 
-        assert_eq!(my_map_pos.len(), 1, "There should only be 1 position for my robot");
+        assert_eq!(
+            my_map_pos.len(),
+            1,
+            "There should only be 1 position for my robot"
+        );
         assert_eq!(lmap.my_position(), &my_map_pos[0]);
     }
 
@@ -126,7 +136,8 @@ mod tests {
         let other_positions = vec![];
 
         let lmap = make_local_map(my_position, other_positions);
-        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+        let positions =
+            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
 
         assert_eq!(positions.len(), 0, "There should only be no other robots");
         assert_eq!(lmap.other_positions(), &positions);
@@ -138,7 +149,8 @@ mod tests {
         let other_positions = vec![Coords::new(1.0, 1.0, 0.0)];
 
         let lmap = make_local_map(my_position, other_positions);
-        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+        let positions =
+            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
 
         assert_eq!(positions.len(), 1, "There should only be 1 other robots");
         assert_eq!(lmap.other_positions(), &positions);
@@ -154,7 +166,8 @@ mod tests {
         ];
 
         let lmap = make_local_map(my_position, other_positions);
-        let positions = get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+        let positions =
+            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
 
         assert_eq!(positions.len(), 3, "There should only be 3 other robots");
         assert_eq!(lmap.other_positions(), &positions);
