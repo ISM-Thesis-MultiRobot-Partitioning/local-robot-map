@@ -1,6 +1,6 @@
 use crate::{
-    AxisResolution, Coords, MapState, MapStateMatrix, Mask, RealWorldLocation,
-    Visualize,
+    coords::InternalLocation, AxisResolution, Coords, MapState, MapStateMatrix,
+    Mask, RealWorldLocation, Visualize,
 };
 use num::cast::ToPrimitive;
 
@@ -17,7 +17,9 @@ use image::{ImageBuffer, RgbImage};
 /// # Example
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation, Coords, MapState};
+/// use local_robot_map::{
+///     AxisResolution, CellMap, Coords, MapState, RealWorldLocation,
+/// };
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
 /// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
@@ -185,28 +187,42 @@ impl Mask for CellMap {
         self.cells
             .indexed_iter()
             .filter(|((_, _), e)| filter(**e))
-            .map(|((row, col), e)| Cell::new(col, row, e))
+            .map(|((row, col), e)| {
+                Cell::new(
+                    InternalLocation::new(
+                        Coords::new(
+                            col.to_f64().expect("usize to f64 should work"),
+                            row.to_f64().expect("usize to f64 should work"),
+                            0.0,
+                        ),
+                        *self.offset(),
+                    ),
+                    e,
+                )
+            })
             .collect()
     }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Cell<'a> {
-    x: usize,
-    y: usize,
+    location: RealWorldLocation,
     value: &'a MapState,
 }
 
 impl<'a> Cell<'a> {
-    pub fn new(x: usize, y: usize, value: &'a MapState) -> Self {
-        Self { x, y, value }
+    pub(crate) fn new(location: InternalLocation, value: &'a MapState) -> Self {
+        Self {
+            location: location.into_real_world(),
+            value,
+        }
     }
 
-    pub fn x(&self) -> usize {
-        self.x
+    pub fn x(&self) -> &f64 {
+        &self.location.x
     }
-    pub fn y(&self) -> usize {
-        self.y
+    pub fn y(&self) -> &f64 {
+        &self.location.y
     }
     pub fn value(&self) -> &'a MapState {
         self.value
@@ -221,7 +237,7 @@ pub mod tests {
 
     use super::*;
 
-    pub fn make_map() -> CellMap {
+    pub fn make_map() -> (CellMap, Coords) {
         let ms = HashMap::from([
             ("OOM", MapState::OutOfMap),
             ("OTR", MapState::OtherRobot),
@@ -232,7 +248,8 @@ pub mod tests {
             ("ASS", MapState::Assigned),
         ]);
 
-        CellMap::from_raster(
+        let offset = Coords::new(0.0, 0.0, 0.0);
+        let cell = CellMap::from_raster(
             MapStateMatrix::from_shape_vec(
                 (5, 3),
                 vec![
@@ -255,8 +272,10 @@ pub mod tests {
             )
             .unwrap(),
             AxisResolution::uniform(1.0),
-            Coords::new(0.0, 0.0, 0.0),
-        )
+            offset,
+        );
+
+        (cell, offset)
     }
 
     #[test]
@@ -465,7 +484,7 @@ pub mod tests {
 
     #[test]
     fn submap_get_map_region() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_region(|e| e == MapState::OutOfMap);
 
@@ -473,15 +492,21 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(0, 0, &MapState::OutOfMap),
-                Cell::new(1, 2, &MapState::OutOfMap),
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
+                    &MapState::OutOfMap
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset),
+                    &MapState::OutOfMap
+                ),
             ]
         );
     }
 
     #[test]
     fn submap_get_out_of_map() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_state(MapState::OutOfMap);
 
@@ -489,15 +514,21 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(0, 0, &MapState::OutOfMap),
-                Cell::new(1, 2, &MapState::OutOfMap),
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
+                    &MapState::OutOfMap
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset),
+                    &MapState::OutOfMap
+                ),
             ]
         );
     }
 
     #[test]
     fn submap_get_explored() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_state(MapState::Explored);
 
@@ -505,15 +536,21 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(2, 1, &MapState::Explored),
-                Cell::new(1, 4, &MapState::Explored),
+                Cell::new(
+                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset),
+                    &MapState::Explored
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset),
+                    &MapState::Explored
+                ),
             ]
         );
     }
 
     #[test]
     fn submap_get_unexplored() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_state(MapState::Unexplored);
 
@@ -521,16 +558,25 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(1, 1, &MapState::Unexplored),
-                Cell::new(1, 3, &MapState::Unexplored),
-                Cell::new(0, 4, &MapState::Unexplored),
+                Cell::new(
+                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset),
+                    &MapState::Unexplored
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset),
+                    &MapState::Unexplored
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset),
+                    &MapState::Unexplored
+                ),
             ]
         );
     }
 
     #[test]
     fn submap_get_frontier() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_state(MapState::Frontier);
 
@@ -538,15 +584,21 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(0, 1, &MapState::Frontier),
-                Cell::new(2, 4, &MapState::Frontier),
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset),
+                    &MapState::Frontier
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset),
+                    &MapState::Frontier
+                ),
             ]
         );
     }
 
     #[test]
     fn submap_get_assigned() {
-        let map = make_map();
+        let (map, offset) = make_map();
 
         let cells = map.get_map_state(MapState::Assigned);
 
@@ -554,15 +606,21 @@ pub mod tests {
         assert_eq!(
             cells,
             vec![
-                Cell::new(0, 2, &MapState::Assigned),
-                Cell::new(2, 3, &MapState::Assigned),
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset),
+                    &MapState::Assigned
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset),
+                    &MapState::Assigned
+                ),
             ]
         );
     }
 
     #[test]
     fn save_map_to_png() {
-        let map = make_map();
+        let (map, _) = make_map();
         map.as_image().save("test_save_map.png").unwrap();
     }
 }
