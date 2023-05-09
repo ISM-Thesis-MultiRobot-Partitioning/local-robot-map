@@ -1,5 +1,6 @@
 use crate::{
-    AxisResolution, Coords, MapState, MapStateMatrix, Mask, Visualize, RealWorldLocation,
+    AxisResolution, Coords, MapState, MapStateMatrix, Mask, RealWorldLocation,
+    Visualize,
 };
 use num::cast::ToPrimitive;
 
@@ -16,10 +17,10 @@ use image::{ImageBuffer, RgbImage};
 /// # Example
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords, MapState};
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation, Coords, MapState};
 ///
-/// let point1 = Coords::new(-1.0, -2.0, 0.0);
-/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
+/// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
 /// let resolution = AxisResolution::uniform(2.0);
 ///
 /// let map = CellMap::new(point1, point2, resolution);
@@ -44,10 +45,12 @@ use image::{ImageBuffer, RgbImage};
 /// setting a higher `resolution` like in the previous example.
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords, MapState};
+/// use local_robot_map::{
+///     AxisResolution, CellMap, MapState, RealWorldLocation,
+/// };
 ///
-/// let point1 = Coords::new(-1.0, -2.0, 0.0);
-/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
+/// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
 /// let resolution = AxisResolution::uniform(1.0);
 ///
 /// let map = CellMap::new(point1, point2, resolution);
@@ -57,10 +60,12 @@ use image::{ImageBuffer, RgbImage};
 /// ```
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords, MapState};
+/// use local_robot_map::{
+///     AxisResolution, CellMap, MapState, RealWorldLocation,
+/// };
 ///
-/// let point1 = Coords::new(-1.0, -2.0, 0.0);
-/// let point2 = Coords::new(0.5, 1.0, 0.0);
+/// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
+/// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
 /// let resolution = AxisResolution::uniform(1.0);
 ///
 /// let map = CellMap::new(point1, point2, resolution);
@@ -227,16 +232,25 @@ pub mod tests {
             ("ASS", MapState::Assigned),
         ]);
 
-
         CellMap::from_raster(
             MapStateMatrix::from_shape_vec(
                 (5, 3),
                 vec![
-                    *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), *ms.get("MYR").unwrap(), //
-                    *ms.get("FNT").unwrap(), *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), //
-                    *ms.get("ASS").unwrap(), *ms.get("OOM").unwrap(), *ms.get("OTR").unwrap(), //
-                    *ms.get("MYR").unwrap(), *ms.get("UNE").unwrap(), *ms.get("ASS").unwrap(), //
-                    *ms.get("UNE").unwrap(), *ms.get("EXP").unwrap(), *ms.get("FNT").unwrap(), //
+                    *ms.get("OOM").unwrap(),
+                    *ms.get("OTR").unwrap(),
+                    *ms.get("MYR").unwrap(), //
+                    *ms.get("FNT").unwrap(),
+                    *ms.get("UNE").unwrap(),
+                    *ms.get("EXP").unwrap(), //
+                    *ms.get("ASS").unwrap(),
+                    *ms.get("OOM").unwrap(),
+                    *ms.get("OTR").unwrap(), //
+                    *ms.get("MYR").unwrap(),
+                    *ms.get("UNE").unwrap(),
+                    *ms.get("ASS").unwrap(), //
+                    *ms.get("UNE").unwrap(),
+                    *ms.get("EXP").unwrap(),
+                    *ms.get("FNT").unwrap(), //
                 ],
             )
             .unwrap(),
@@ -248,8 +262,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_one_by_one() {
         let map = CellMap::new(
-            Coords::new(0.0, 0.0, 0.0),
-            Coords::new(1.0, 1.0, 0.0),
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
@@ -275,8 +289,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_one_by_one_negative() {
         let map = CellMap::new(
-            Coords::new(0.0, 0.0, 0.0),
-            Coords::new(-1.0, -1.0, 0.0),
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            RealWorldLocation::from_xyz(-1.0, -1.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
@@ -303,8 +317,8 @@ pub mod tests {
     fn create_cell_map_offset() {
         let (x, y) = (14.26, 95.21);
         let map = CellMap::new(
-            Coords::new(x, y, 0.0),
-            Coords::new(x + 1.0, y + 1.0, 0.0),
+            RealWorldLocation::from_xyz(x, y, 0.0),
+            RealWorldLocation::from_xyz(x + 1.0, y + 1.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
@@ -324,8 +338,8 @@ pub mod tests {
     fn create_cell_map_offset_negative() {
         let (x, y) = (-126.83, -7165.1137);
         let map = CellMap::new(
-            Coords::new(x, y, 0.0),
-            Coords::new(x + 1.0, y + 1.0, 0.0),
+            RealWorldLocation::from_xyz(x, y, 0.0),
+            RealWorldLocation::from_xyz(x + 1.0, y + 1.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
@@ -344,8 +358,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_resolution() {
         let map = CellMap::new(
-            Coords::new(0.0, 0.0, 0.0),
-            Coords::new(1.0, 1.0, 0.0),
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
             AxisResolution::uniform(7.0),
         );
         assert_eq!(
@@ -371,8 +385,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_resolution_negative() {
         let map = CellMap::new(
-            Coords::new(0.0, 0.0, 0.0),
-            Coords::new(-1.0, -1.0, 0.0),
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            RealWorldLocation::from_xyz(-1.0, -1.0, 0.0),
             AxisResolution::uniform(7.0),
         );
         assert_eq!(
@@ -398,8 +412,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_dimension() {
         let map = CellMap::new(
-            Coords::new(1.0, 3.0, 0.0),
-            Coords::new(10.0, 4.0, 0.0),
+            RealWorldLocation::from_xyz(1.0, 3.0, 0.0),
+            RealWorldLocation::from_xyz(10.0, 4.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
@@ -425,8 +439,8 @@ pub mod tests {
     #[test]
     fn create_cell_map_dimension_negative() {
         let map = CellMap::new(
-            Coords::new(-10.0, -4.0, 0.0),
-            Coords::new(1.0, 3.0, 0.0),
+            RealWorldLocation::from_xyz(-10.0, -4.0, 0.0),
+            RealWorldLocation::from_xyz(1.0, 3.0, 0.0),
             AxisResolution::uniform(1.0),
         );
         assert_eq!(
