@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Deref};
+use std::ops::{Add, Deref, Sub};
 
 /// Create 3D coordinates. Assumes *meter* as the unit of measurement.
 ///
@@ -399,14 +399,12 @@ mod tests {
     /// coordinates.
     #[test]
     fn internal_to_external_coords() {
+        let offset = Coords::new(-1.0, -1.0, -1.0);
         let internal_locations: Vec<InternalLocation> = vec![
-            RealWorldLocation::new(Coords::new(-1.0, -1.0, -1.0)),
-            RealWorldLocation::new(Coords::new(0.0, 0.0, 0.0)),
-            RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
-        ]
-        .into_iter()
-        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
-        .collect();
+            InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
+            InternalLocation::new(Coords::new(1.0, 1.0, 1.0), offset),
+            InternalLocation::new(Coords::new(2.0, 2.0, 2.0), offset),
+        ];
 
         let external_locations: Vec<RealWorldLocation> = internal_locations
             .into_iter()
