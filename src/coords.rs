@@ -156,6 +156,14 @@ impl RealWorldLocation {
         Self { location }
     }
 
+    /// Construct a real world location using x, y, and z coordinates.
+    ///
+    /// Think of it as a convenience function which takes care of creating the
+    /// actual [`Coords`] type for you. See also [`Coords::new`].
+    pub fn from_xyz(x: f64, y: f64, z: f64) -> Self {
+        Self::new(Coords::new(x, y, z))
+    }
+
     /// Translate from real-world coordinates to internal ones.
     ///
     /// # What is happening
