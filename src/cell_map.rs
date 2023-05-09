@@ -1,5 +1,5 @@
 use crate::{
-    AxisResolution, Coords, MapState, MapStateMatrix, Mask, Visualize,
+    AxisResolution, Coords, MapState, MapStateMatrix, Mask, Visualize, RealWorldLocation,
 };
 use num::cast::ToPrimitive;
 
@@ -87,8 +87,8 @@ impl CellMap {
     /// bounding box area. The resolution affects how many pixels/cells per
     /// meter will be generated.
     pub fn new(
-        point1: Coords,
-        point2: Coords,
+        point1: RealWorldLocation,
+        point2: RealWorldLocation,
         resolution: AxisResolution,
     ) -> Self {
         let columns = point1.distance_x(&point2) * resolution.x;
