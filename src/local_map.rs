@@ -1,8 +1,8 @@
-use crate::{Coords, MaskMapState, Partition, Visualize};
+use crate::{Coords, MaskMapState, Partition, Visualize, Location};
 
 pub struct LocalMap<T>
 where
-    T: Partition + MaskMapState + Visualize,
+    T: Partition + Location + MaskMapState + Visualize,
 {
     map: T,
     my_position: Coords,
@@ -11,7 +11,7 @@ where
 
 impl<T> LocalMap<T>
 where
-    T: Partition + MaskMapState + Visualize,
+    T: Partition + Location + MaskMapState + Visualize,
 {
     pub fn new(
         map: T,
@@ -43,7 +43,7 @@ where
 
 impl<T> Partition for LocalMap<T>
 where
-    T: Partition + MaskMapState + Visualize,
+    T: Partition + Location + MaskMapState + Visualize,
 {
     fn partition(self) -> Self {
         Self {
@@ -56,7 +56,7 @@ where
 
 impl<T> Visualize for LocalMap<T>
 where
-    T: Partition + MaskMapState + Visualize,
+    T: Partition + Location + MaskMapState + Visualize,
 {
     type ImageType = <T as Visualize>::ImageType;
 

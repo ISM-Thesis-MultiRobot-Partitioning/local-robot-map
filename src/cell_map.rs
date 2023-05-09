@@ -1,6 +1,6 @@
 use crate::{
-    coords::InternalLocation, AxisResolution, Coords, MapState, MapStateMatrix,
-    Mask, RealWorldLocation, Visualize,
+    coords::InternalLocation, AxisResolution, Coords, Location, LocationError,
+    MapState, MapStateMatrix, Mask, RealWorldLocation, Visualize,
 };
 use num::cast::ToPrimitive;
 
@@ -137,6 +137,39 @@ impl CellMap {
         }
     }
 
+    /// Convert a floating point location into its corresponding
+    /// [`MapStateMatrix`] cell index.
+    ///
+    /// If conversion was succcessful, it returns the `(row, col)` index to be
+    /// used on the `[MapStateMatrix]`; see [`ndarray`
+    /// slicing](ndarray::ArrayBase#indexing-and-dimension).
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if .
+    ///
+    /// # More details on what it does
+    ///
+    /// The internal [`CellMap`] cannot represent every real-world location. The
+    /// *resolution* specifies how fine grained the map shall be in order to
+    /// represent the locations more precisely. Higher resolution will provide
+    /// more precsision, whereas lower resolution will make the distinction of
+    /// locations on a smaller scale impossible.
+    ///
+    /// That said, one can think of the *resolution* as a way to subdivide a
+    /// region into smaller subregions. In the case of a 2D map, we would
+    /// end up with smaller rectangular subdivisions. Converting the real-world
+    /// floating point location then consists in identifying which such
+    /// rectangle the location in question corresponds to.
+    pub fn location_to_map_index(
+        &self,
+        location: &RealWorldLocation,
+    ) -> Result<[usize; 2], LocationError> {
+        let coord: InternalLocation =
+            location.clone().into_internal(self.offset);
+        todo!()
+    }
+
     pub fn resolution(&self) -> &AxisResolution {
         &self.resolution
     }
@@ -201,6 +234,27 @@ impl Mask for CellMap {
                 )
             })
             .collect()
+    }
+}
+
+impl Location for CellMap {
+    type LocationType = MapState;
+
+    fn get_location(
+        &self,
+        coord: &RealWorldLocation,
+    ) -> Result<Self::LocationType, crate::LocationError> {
+        let index = self.location_to_map_index(coord)?;
+        Ok(self.cells()[index])
+    }
+
+    fn set_location(
+        &mut self,
+        coord: &RealWorldLocation,
+        value: Self::LocationType,
+    ) -> Result<(), crate::LocationError> {
+        let index = self.location_to_map_index(coord)?;
+        todo!("remove warnings for now: {:?} {:?}", index, value)
     }
 }
 

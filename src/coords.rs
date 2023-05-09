@@ -144,9 +144,8 @@ impl Sub for Coords {
 /// the coordinates to accomodate for such cases. There are a few other cases
 /// where offsetting takes place internally, but it is outside the scope of this
 /// description.
-///
-#[derive(Debug, PartialEq)]
 // See [`RealWorldLocation::into_internal`] for more details.
+#[derive(Debug, PartialEq, Clone)]
 pub struct RealWorldLocation {
     /// The location in terms of real world coordinates.
     location: Coords,
