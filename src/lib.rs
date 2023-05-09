@@ -31,7 +31,7 @@ pub use polygon_map::PolygonMap;
 
 pub use local_map::LocalMap;
 
-type MapStateMatrix = Array2<MapState>;
+pub type MapStateMatrix = Array2<MapState>;
 
 /// Visualize a map.
 pub trait Visualize {
