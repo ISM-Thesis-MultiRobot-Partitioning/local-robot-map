@@ -209,22 +209,22 @@ pub trait Location {
     /// location. See [`LocationError`] for details.
     fn get_location(
         &self,
-        coord: RealWorldLocation,
+        coord: &RealWorldLocation,
     ) -> Result<Self::LocationType, LocationError>;
     /// Updates the given location in the map with a new value.
     ///
     /// If a value was already present at the given location, it should be
-    /// overwritten by the new value. The function returns `Ok(old_value)`
-    /// if the value was successfully replaced.
+    /// overwritten by the new value. The function returns `Ok(())` if the value
+    /// was successfully replaced.
     ///
     /// # Errors
     ///
     /// Same as [`Location::get_location`].
     fn set_location(
         &mut self,
-        coord: RealWorldLocation,
+        coord: &RealWorldLocation,
         value: Self::LocationType,
-    ) -> Result<Self::LocationType, LocationError>;
+    ) -> Result<(), LocationError>;
 }
 
 pub enum LocationError {
