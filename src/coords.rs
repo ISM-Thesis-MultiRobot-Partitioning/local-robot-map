@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Deref};
 
 /// Create 3D coordinates. Assumes *meter* as the unit of measurement.
 ///
@@ -195,6 +195,14 @@ impl RealWorldLocation {
     }
     pub fn z(&self) -> f64 {
         self.location().z
+    }
+}
+
+impl Deref for RealWorldLocation {
+    type Target = Coords;
+
+    fn deref(&self) -> &Self::Target {
+        self.location()
     }
 }
 
