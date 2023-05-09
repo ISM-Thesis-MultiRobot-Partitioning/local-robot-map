@@ -34,6 +34,11 @@ where
     pub fn other_positions(&self) -> &Vec<Coords> {
         &self.other_positions
     }
+
+    fn update_my_position(&mut self, new_position: Coords) {
+        self.my_position = new_position;
+        self.map();
+    }
 }
 
 impl<T> Partition for LocalMap<T>
@@ -63,7 +68,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cell_map::tests::make_map, CellMap, MapState};
+    use crate::{cell_map::tests::make_map, CellMap, MapState, RealWorldLocation};
 
     // dummy implementation for testing purposes
     impl Partition for CellMap {
@@ -76,7 +81,7 @@ mod tests {
         my_position: Coords,
         other_positions: Vec<Coords>,
     ) -> LocalMap<CellMap> {
-        let map = make_map();
+        let (map, _) = make_map();
 
         LocalMap::new(map, my_position, other_positions)
     }
@@ -87,8 +92,8 @@ mod tests {
     ) -> LocalMap<CellMap> {
         LocalMap::new(
             CellMap::new(
-                Coords::new(0.0, 0.0, 0.0),
-                Coords::new(10.0, 10.0, 10.0),
+                RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+                RealWorldLocation::from_xyz(10.0, 10.0, 10.0),
                 crate::AxisResolution::uniform(1.0),
             ),
             my_position,
@@ -99,7 +104,7 @@ mod tests {
     fn get_mapstate_pos_from_map(map: &CellMap, state: MapState) -> Vec<Coords> {
         map.get_map_state(state)
             .iter()
-            .map(|cell| Coords::new(cell.x() as f64, cell.y() as f64, 0.0))
+            .map(|cell| Coords::new(*cell.x(), *cell.y(), 0.0))
             .collect()
     }
 
@@ -158,7 +163,8 @@ mod tests {
     #[test]
     fn get_map() {
         let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
-        assert_eq!(lmap.map(), &make_map());
+        let (map, _) = make_map();
+        assert_eq!(lmap.map(), &map);
     }
 
     #[test]
