@@ -133,11 +133,15 @@ mod tests {
     const OOM: MapState = MapState::OutOfMap;
     const UNE: MapState = MapState::Unexplored;
 
+    /// Note how the rasterized polygon seems tilted to the right and not
+    /// perfectly centered/symmetric. I assume this is an artifact from the
+    /// [`geo_rasterize`] crate, but I could not find any relevant information
+    /// thereon. It should not pose too big of an issue though.
     #[test]
     fn polygon_map_to_cell_map_positive() {
-        let p1 = Coords::new(0.0, 0.0, 0.0);
-        let p2 = Coords::new(4.0, 4.0, 0.0);
-        let p3 = Coords::new(8.0, 0.0, 0.0);
+        let p1 = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
+        let p2 = RealWorldLocation::from_xyz(4.0, 4.0, 0.0);
+        let p3 = RealWorldLocation::from_xyz(8.0, 0.0, 0.0);
 
         let resolution = AxisResolution::uniform(1.0);
         let cellmap: CellMap =
@@ -151,10 +155,10 @@ mod tests {
             MapStateMatrix::from_shape_vec(
                 (cellmap.nrows(), cellmap.ncols()),
                 vec![
-                    OOM, OOM, OOM, UNE, UNE, OOM, OOM, OOM, //
-                    OOM, OOM, UNE, UNE, UNE, UNE, OOM, OOM, //
-                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, OOM, //
                     UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, OOM, UNE, UNE, UNE, UNE, UNE, OOM, //
+                    OOM, OOM, OOM, UNE, UNE, UNE, OOM, OOM, //
                 ]
             )
             .unwrap()
@@ -163,13 +167,57 @@ mod tests {
 
     #[test]
     fn polygon_map_to_cell_map_negative() {
-        todo!("Check if conversion works if polygon's vertices only have negative coordinates");
+        let p1 = RealWorldLocation::from_xyz(0.0, -2.0, 0.0);
+        let p2 = RealWorldLocation::from_xyz(-2.0, 0.0, 0.0);
+        let p3 = RealWorldLocation::from_xyz(-4.0, -2.0, 0.0);
+
+        let resolution = AxisResolution::uniform(2.0);
+        let cellmap: CellMap =
+            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+
+        assert_eq!(cellmap.width(), 8);
+        assert_eq!(cellmap.height(), 4);
+
+        assert_eq!(
+            cellmap.cells(),
+            MapStateMatrix::from_shape_vec(
+                (cellmap.nrows(), cellmap.ncols()),
+                vec![
+                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, OOM, UNE, UNE, UNE, UNE, UNE, OOM, //
+                    OOM, OOM, OOM, UNE, UNE, UNE, OOM, OOM, //
+                ]
+            )
+            .unwrap()
+        )
     }
 
     #[test]
     fn polygon_map_to_cell_map_partly_negative() {
-        todo!(
-            "Check if conversion works if some of the polygon's vertices have negative coordinates"
-        );
+        let p1 = RealWorldLocation::from_xyz(-2.0, 0.0, 0.0);
+        let p2 = RealWorldLocation::from_xyz(0.0, 2.0, 0.0);
+        let p3 = RealWorldLocation::from_xyz(2.0, 0.0, 0.0);
+
+        let resolution = AxisResolution::uniform(2.0);
+        let cellmap: CellMap =
+            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+
+        assert_eq!(cellmap.width(), 8);
+        assert_eq!(cellmap.height(), 4);
+
+        assert_eq!(
+            cellmap.cells(),
+            MapStateMatrix::from_shape_vec(
+                (cellmap.nrows(), cellmap.ncols()),
+                vec![
+                    UNE, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, UNE, UNE, UNE, UNE, UNE, UNE, UNE, //
+                    OOM, OOM, UNE, UNE, UNE, UNE, UNE, OOM, //
+                    OOM, OOM, OOM, UNE, UNE, UNE, OOM, OOM, //
+                ]
+            )
+            .unwrap()
+        )
     }
 }

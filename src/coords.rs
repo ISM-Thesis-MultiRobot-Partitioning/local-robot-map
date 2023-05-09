@@ -146,6 +146,7 @@ impl Sub for Coords {
 /// description.
 ///
 /// See [`RealWorldLocation::into_internal`] for more details.
+#[derive(Debug, PartialEq)]
 pub struct RealWorldLocation {
     /// The location in terms of real world coordinates.
     location: Coords,
