@@ -4,7 +4,7 @@ use num::ToPrimitive;
 
 use crate::cell_map::CellMap;
 use crate::coords::{AxisResolution, Coords};
-use crate::{MapState, MapStateMatrix};
+use crate::{MapState, MapStateMatrix, RealWorldLocation};
 
 /// Describe a map using a polygon.
 ///
@@ -12,37 +12,30 @@ use crate::{MapState, MapStateMatrix};
 ///
 /// # Examples
 /// ```
-/// use local_robot_map::Coords;
 /// use local_robot_map::PolygonMap;
+/// use local_robot_map::RealWorldLocation;
 ///
-/// let p1 = Coords::new(0.0, 0.0, 0.0);
-/// let p2 = Coords::new(1.0, 1.0, 0.0);
-/// let p3 = Coords::new(2.0, 0.0, 0.0);
+/// let p1 = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
+/// let p2 = RealWorldLocation::from_xyz(1.0, 1.0, 0.0);
+/// let p3 = RealWorldLocation::from_xyz(2.0, 0.0, 0.0);
 /// let polygon = PolygonMap::new(vec![p1, p2, p3]);
 ///
 /// assert_eq!(
 ///     polygon.vertices(),
 ///     &vec![
-///         Coords::new(0.0, 0.0, 0.0),
-///         Coords::new(1.0, 1.0, 0.0),
-///         Coords::new(2.0, 0.0, 0.0),
+///         RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+///         RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
+///         RealWorldLocation::from_xyz(2.0, 0.0, 0.0),
 ///     ]
 /// );
 /// ```
 pub struct PolygonMap {
-    vertices: Vec<Coords>,
-    polygon: geo::Polygon,
+    vertices: Vec<RealWorldLocation>,
 }
 
 impl PolygonMap {
-    pub fn new(vertices: Vec<Coords>) -> Self {
-        let polygon = geo::Polygon::new(
-            geo::LineString::from(
-                vertices.iter().map(|e| (e.x, e.y)).collect::<Vec<_>>(),
-            ),
-            vec![],
-        );
-        Self { vertices, polygon }
+    pub fn new(vertices: Vec<RealWorldLocation>) -> Self {
+        Self { vertices }
     }
 
     /// Convert this map to a [`CellMap`].
@@ -54,15 +47,8 @@ impl PolygonMap {
     /// The `resolution` is used to impact the size/dimension of the
     /// [`CellMap`]. See also [`AxisResolution`].
     pub fn to_cell_map(self, resolution: AxisResolution) -> CellMap {
-        CellMap::from_raster(
-            self.rasterize_polygon(&resolution),
-            resolution,
-            Coords {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-        )
+        let (cells, offset) = self.rasterize_polygon(&resolution);
+        CellMap::from_raster(cells, resolution, offset)
     }
 
     /// Internal helper function to convert the polygon to a corresponding
@@ -84,18 +70,37 @@ impl PolygonMap {
     ///   there are NaN of infinite values.
     /// - The rasterization itself can panic as well if there are NaN of
     ///   infinite values.
-    fn rasterize_polygon(&self, resolution: &AxisResolution) -> MapStateMatrix {
-        let bbox = match self.polygon.bounding_rect() {
+    fn rasterize_polygon(
+        &self,
+        resolution: &AxisResolution,
+    ) -> (MapStateMatrix, Coords) {
+        let polygon = geo::Polygon::new(
+            geo::LineString::from(
+                self.vertices
+                    .iter()
+                    .map(|e| (e.x(), e.y()))
+                    .collect::<Vec<_>>(),
+            ),
+            vec![],
+        );
+
+        let bbox = match polygon.bounding_rect() {
             Some(b) => b,
             None => panic!("No bounding box for polygon"),
         };
+        let offset = Coords::new(bbox.min().x, bbox.min().y, 0.0);
+        // convert to pixels
         let width = bbox.width() * resolution.x;
         let height = bbox.height() * resolution.y;
-        let polygon =
-            self.polygon.map_coords(|geo::Coord { x, y }| geo::Coord {
-                x: x * resolution.x,
-                y: y * resolution.y,
-            });
+        let polygon = polygon.map_coords(|geo::Coord { x, y }| {
+            let internal_location =
+                RealWorldLocation::new(Coords::new(x, y, 0.0))
+                    .into_internal(offset);
+            geo::Coord {
+                x: internal_location.x() * resolution.x,
+                y: internal_location.y() * resolution.y,
+            }
+        });
 
         let mut rasterizer = BinaryBuilder::new()
             .width(width.to_usize().expect("No conversion issues"))
@@ -107,13 +112,15 @@ impl PolygonMap {
             .rasterize(&polygon)
             .expect("There should be no NaN of infinite values");
 
-        rasterizer.finish().map(|e| match e {
+        let cells = rasterizer.finish().map(|e| match e {
             true => MapState::Unexplored,
             false => MapState::OutOfMap,
-        })
+        });
+
+        (cells, offset)
     }
 
-    pub fn vertices(&self) -> &Vec<Coords> {
+    pub fn vertices(&self) -> &Vec<RealWorldLocation> {
         &self.vertices
     }
 }
