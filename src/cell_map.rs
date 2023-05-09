@@ -229,7 +229,8 @@ impl Mask for CellMap {
                             0.0,
                         ),
                         *self.offset(),
-                    ),
+                    )
+                    .expect("indexed_iter() will not return negative indexes"),
                     e,
                 )
             })
@@ -547,11 +548,13 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::OutOfMap
                 ),
             ]
@@ -569,11 +572,13 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::OutOfMap
                 ),
             ]
@@ -591,11 +596,13 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Explored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Explored
                 ),
             ]
@@ -613,15 +620,18 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Unexplored
                 ),
             ]
@@ -639,11 +649,13 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Frontier
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Frontier
                 ),
             ]
@@ -661,11 +673,13 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Assigned
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset),
+                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset)
+                        .unwrap(),
                     &MapState::Assigned
                 ),
             ]

@@ -181,6 +181,7 @@ impl RealWorldLocation {
     /// Check out the unit tests for examples.
     pub(crate) fn into_internal(self, offset: Coords) -> InternalLocation {
         InternalLocation::new(self.location - offset, offset)
+            .expect("The math for offsetting the coordinates is right.")
     }
 
     pub fn location(&self) -> &Coords {
@@ -205,6 +206,16 @@ impl Deref for RealWorldLocation {
     }
 }
 
+/// Explicitly describe internal coordinates for use with matrices.
+///
+/// The difference to [`RealWorldLocation`] is that we want the coordinates to
+/// be positive only. Negative coordinates would lead to negative indexing in
+/// the [`MapStateMatrix`] which is not directly possible. As such, the
+/// [`InternalLocation`] should only contain positive coordinates.
+///
+/// The [`InternalLocation::into_real_world`] takes the given *offset* and
+/// converts it back into a [`RealWorldLocation`], which allows for negative
+/// coordinates.
 pub(crate) struct InternalLocation {
     location: Coords,
     offset: Coords,
@@ -213,13 +224,20 @@ pub(crate) struct InternalLocation {
 impl InternalLocation {
     /// Creates a new [`InternalLocation`].
     ///
+    /// Returns `None` if the any of the coordinate values are negative, returns
+    /// `Some()` if all are positive.
+    ///
     /// # Assumption
     ///
     /// The `location` is the already offset coordinate; this function performs
     /// no calculations. See [`RealWorldLocation::into_internal`] for more
     /// details.
-    pub(crate) fn new(location: Coords, offset: Coords) -> Self {
-        Self { location, offset }
+    pub(crate) fn new(location: Coords, offset: Coords) -> Option<Self> {
+        if offset.x() > 0.0 && offset.y() > 0.0 && offset.z() > 0.0 {
+            Some(Self { location, offset })
+        } else {
+            None
+        }
     }
 
     /// Translate from internal location back to the original real-world one.
@@ -400,9 +418,9 @@ mod tests {
     fn internal_to_external_coords() {
         let offset = Coords::new(-1.0, -1.0, -1.0);
         let internal_locations: Vec<InternalLocation> = vec![
-            InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset),
-            InternalLocation::new(Coords::new(1.0, 1.0, 1.0), offset),
-            InternalLocation::new(Coords::new(2.0, 2.0, 2.0), offset),
+            InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset).unwrap(),
+            InternalLocation::new(Coords::new(1.0, 1.0, 1.0), offset).unwrap(),
+            InternalLocation::new(Coords::new(2.0, 2.0, 2.0), offset).unwrap(),
         ];
 
         let external_locations: Vec<RealWorldLocation> = internal_locations
