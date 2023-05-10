@@ -282,11 +282,11 @@ impl InternalLocation {
 /// The following means we have one pixel per square meter.
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords};
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation};
 ///
 /// let map = CellMap::new(
-///     Coords::new(0.0, 0.0, 0.0),
-///     Coords::new(1.0, 1.0, 0.0),
+///     RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+///     RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
 ///     AxisResolution::uniform(1.0),
 /// );
 /// assert_eq!(map.width(), 1);
@@ -298,11 +298,11 @@ impl InternalLocation {
 /// the square into 4.
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords};
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation};
 ///
 /// let map = CellMap::new(
-///     Coords::new(0.0, 0.0, 0.0),
-///     Coords::new(1.0, 1.0, 0.0),
+///     RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+///     RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
 ///     AxisResolution::uniform(2.0),
 /// );
 /// assert_eq!(map.width(), 2);
@@ -313,11 +313,11 @@ impl InternalLocation {
 /// per meter on the Y axis.
 ///
 /// ```
-/// use local_robot_map::{AxisResolution, CellMap, Coords};
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation};
 ///
 /// let map = CellMap::new(
-///     Coords::new(0.0, 0.0, 0.0),
-///     Coords::new(1.0, 1.0, 0.0),
+///     RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+///     RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
 ///     AxisResolution::new(1.0, 10.0, 0.0),
 /// );
 /// assert_eq!(map.width(), 1);
