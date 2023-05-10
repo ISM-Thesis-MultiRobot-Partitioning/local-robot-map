@@ -227,6 +227,7 @@ pub trait Location {
     ) -> Result<(), LocationError>;
 }
 
+#[derive(Debug, PartialEq)]
 pub enum LocationError {
     /// The requested location is outside the map area and cannot be accessed.
     OutOfMap,

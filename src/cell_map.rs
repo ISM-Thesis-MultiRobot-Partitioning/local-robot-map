@@ -140,7 +140,7 @@ impl CellMap {
     /// Convert a floating point location into its corresponding
     /// [`MapStateMatrix`] cell index.
     ///
-    /// If conversion was succcessful, it returns the `(row, col)` index to be
+    /// If conversion was succcessful, it returns the `[row, col]` index to be
     /// used on the `[MapStateMatrix]`; see [`ndarray`
     /// slicing](ndarray::ArrayBase#indexing-and-dimension).
     ///
@@ -167,7 +167,26 @@ impl CellMap {
     ) -> Result<[usize; 2], LocationError> {
         let coord: InternalLocation =
             location.clone().into_internal(self.offset);
-        todo!()
+
+        if [coord.x(), coord.y(), coord.z()].iter().any(|x| x < &0.0) {
+            panic!("InternalLocation should not have negative values");
+            // return Err(LocationError::OutOfMap);
+        } else if coord.x() > (self.width() as f64 * self.resolution().x)
+            || coord.y() > (self.height() as f64 * self.resolution().y)
+        {
+            return Err(LocationError::OutOfMap);
+        };
+
+        let col: usize = (coord.x() * self.resolution().x)
+            .floor()
+            .to_usize()
+            .expect("An overflow likely occured when converting f64 to usize");
+        let row: usize = (coord.y() * self.resolution().y)
+            .floor()
+            .to_usize()
+            .expect("An overflow likely occured when converting f64 to usize");
+
+        Ok([row, col])
     }
 
     pub fn resolution(&self) -> &AxisResolution {
@@ -246,7 +265,7 @@ impl Location for CellMap {
         coord: &RealWorldLocation,
     ) -> Result<Self::LocationType, crate::LocationError> {
         let index = self.location_to_map_index(coord)?;
-        Ok(self.cells()[index])
+        Ok(self.cells[index])
     }
 
     fn set_location(
@@ -255,7 +274,8 @@ impl Location for CellMap {
         value: Self::LocationType,
     ) -> Result<(), crate::LocationError> {
         let index = self.location_to_map_index(coord)?;
-        todo!("remove warnings for now: {:?} {:?}", index, value)
+        self.cells[index] = value;
+        Ok(())
     }
 }
 
@@ -690,5 +710,102 @@ pub mod tests {
     fn save_map_to_png() {
         let (map, _) = make_map();
         map.as_image().save("test_save_map.png").unwrap();
+    }
+
+    #[test]
+    fn location_index_origin() {
+        let (map, _) = make_map();
+        let index = map
+            .location_to_map_index(&RealWorldLocation::from_xyz(0.0, 0.0, 0.0))
+            .unwrap();
+        assert_eq!(index, [0, 0]);
+    }
+
+    #[test]
+    fn location_index_inside() {
+        let (map, _) = make_map();
+        let index = map
+            .location_to_map_index(&RealWorldLocation::from_xyz(2.4, 3.8, 0.0))
+            .unwrap();
+        assert_eq!(index, [3, 2]);
+    }
+
+    #[test]
+    fn location_index_inside_high_resolution() {
+        let map = CellMap::new(
+            RealWorldLocation::from_xyz(-1.0, -1.0, -1.0),
+            RealWorldLocation::from_xyz(1.0, 1.0, 1.0),
+            AxisResolution::uniform(3.0),
+        );
+        let index = map
+            .location_to_map_index(&RealWorldLocation::from_xyz(0.1, -0.3, 0.0))
+            .unwrap();
+        assert_eq!(index, [2, 3]);
+    }
+
+    #[test]
+    fn location_index_inside_uneven_high_resolution() {
+        let map = CellMap::new(
+            RealWorldLocation::from_xyz(-1.0, -1.0, -1.0),
+            RealWorldLocation::from_xyz(1.0, 1.0, 1.0),
+            AxisResolution::new(7.0, 3.0, 1.0),
+        );
+        let index = map
+            .location_to_map_index(&RealWorldLocation::from_xyz(0.1, -0.3, 0.0))
+            .unwrap();
+        assert_eq!(index, [2, 7]);
+    }
+
+    #[test]
+    fn location_index_far_corner() {
+        let (map, _) = make_map();
+        let index = map
+            .location_to_map_index(&RealWorldLocation::from_xyz(
+                map.width() as f64 - 0.3,
+                map.height() as f64 - 0.7,
+                0.0,
+            ))
+            .unwrap();
+        assert_eq!(index, [map.nrows() - 1, map.ncols() - 1]);
+    }
+
+    #[test]
+    fn location_index_too_far_right() {
+        let (map, _) = make_map();
+        let index = map.location_to_map_index(&RealWorldLocation::from_xyz(
+            map.width() as f64 + 1.0,
+            0.0,
+            0.0,
+        ));
+        assert_eq!(index, Err(LocationError::OutOfMap));
+    }
+
+    #[test]
+    fn location_index_too_far_left() {
+        let (map, _) = make_map();
+        let index = map.location_to_map_index(&RealWorldLocation::from_xyz(
+            -1.0, 0.0, 0.0,
+        ));
+        assert_eq!(index, Err(LocationError::OutOfMap));
+    }
+
+    #[test]
+    fn location_index_too_far_up() {
+        let (map, _) = make_map();
+        let index = map.location_to_map_index(&RealWorldLocation::from_xyz(
+            0.0,
+            map.height() as f64 + 1.0,
+            0.0,
+        ));
+        assert_eq!(index, Err(LocationError::OutOfMap));
+    }
+
+    #[test]
+    fn location_index_too_far_down() {
+        let (map, _) = make_map();
+        let index = map.location_to_map_index(&RealWorldLocation::from_xyz(
+            0.0, -1.0, 0.0,
+        ));
+        assert_eq!(index, Err(LocationError::OutOfMap));
     }
 }
