@@ -166,12 +166,12 @@ impl CellMap {
         location: &RealWorldLocation,
     ) -> Result<[usize; 2], LocationError> {
         let coord: InternalLocation =
-            location.clone().into_internal(self.offset);
+            match location.clone().into_internal(self.offset) {
+                Ok(c) => c,
+                Err((location_error, _)) => return Err(location_error),
+            };
 
-        if [coord.x(), coord.y(), coord.z()].iter().any(|x| x < &0.0) {
-            panic!("InternalLocation should not have negative values");
-            // return Err(LocationError::OutOfMap);
-        } else if coord.x() > (self.width() as f64 * self.resolution().x)
+        if coord.x() > (self.width() as f64 * self.resolution().x)
             || coord.y() > (self.height() as f64 * self.resolution().y)
         {
             return Err(LocationError::OutOfMap);

@@ -95,7 +95,8 @@ impl PolygonMap {
         let polygon = polygon.map_coords(|geo::Coord { x, y }| {
             let internal_location =
                 RealWorldLocation::new(Coords::new(x, y, 0.0))
-                    .into_internal(offset);
+                    .into_internal(offset)
+                    .expect("Coordinates should be valid");
             geo::Coord {
                 x: internal_location.x() * resolution.x,
                 y: internal_location.y() * resolution.y,

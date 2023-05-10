@@ -1,5 +1,7 @@
 use std::ops::{Add, Deref, Sub};
 
+use crate::LocationError;
+
 /// Create 3D coordinates. Assumes *meter* as the unit of measurement.
 ///
 /// # Examples
@@ -179,9 +181,11 @@ impl RealWorldLocation {
     /// # Example
     ///
     /// Check out the unit tests for examples.
-    pub(crate) fn into_internal(self, offset: Coords) -> InternalLocation {
+    pub(crate) fn into_internal(
+        self,
+        offset: Coords,
+    ) -> Result<InternalLocation, (LocationError, InternalLocation)> {
         InternalLocation::new(self.location - offset, offset)
-            .expect("The math for offsetting the coordinates is right.")
     }
 
     pub fn location(&self) -> &Coords {
@@ -216,6 +220,7 @@ impl Deref for RealWorldLocation {
 /// The [`InternalLocation::into_real_world`] takes the given *offset* and
 /// converts it back into a [`RealWorldLocation`], which allows for negative
 /// coordinates.
+#[derive(Debug)]
 pub(crate) struct InternalLocation {
     location: Coords,
     offset: Coords,
@@ -232,11 +237,14 @@ impl InternalLocation {
     /// The `location` is the already offset coordinate; this function performs
     /// no calculations. See [`RealWorldLocation::into_internal`] for more
     /// details.
-    pub(crate) fn new(location: Coords, offset: Coords) -> Option<Self> {
+    pub(crate) fn new(
+        location: Coords,
+        offset: Coords,
+    ) -> Result<Self, (LocationError, Self)> {
         if location.x() >= 0.0 && location.y() >= 0.0 && location.z() >= 0.0 {
-            Some(Self { location, offset })
+            Ok(Self { location, offset })
         } else {
-            None
+            Err((LocationError::OutOfMap, Self { location, offset }))
         }
     }
 
@@ -252,7 +260,7 @@ impl InternalLocation {
     /// provide to [`RealWorldLocation::into_internal`]). The implementation
     /// should take care of calculating the relative offset, and thus alleviate
     /// the programmer.
-    pub(crate) fn change_offset(self, offset: Coords) -> Self {
+    pub(crate) fn change_offset(self, offset: Coords) -> Result<Self, (LocationError, Self)> {
         self.into_real_world().into_internal(offset)
     }
 
@@ -394,7 +402,7 @@ mod tests {
 
         let internal_locations: Vec<InternalLocation> = external_locations
             .into_iter()
-            .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+            .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
             .collect();
 
         assert_eq!(
@@ -454,13 +462,13 @@ mod tests {
             RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
         ]
         .into_iter()
-        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
         .collect();
 
         let offset_internal_locations: Vec<InternalLocation> =
             internal_locations
                 .into_iter()
-                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)))
+                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap())
                 .collect();
 
         assert_eq!(
@@ -484,13 +492,13 @@ mod tests {
             RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
         ]
         .into_iter()
-        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)))
+        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
         .collect();
 
         let offset_internal_locations: Vec<InternalLocation> =
             internal_locations
                 .into_iter()
-                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)))
+                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap())
                 .collect();
 
         let external_locations: Vec<RealWorldLocation> =
