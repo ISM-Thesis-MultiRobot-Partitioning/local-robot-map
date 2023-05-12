@@ -1,12 +1,12 @@
-use crate::{Coords, Location, MaskMapState, Partition, Visualize};
+use crate::{Location, MaskMapState, Partition, Visualize, RealWorldLocation};
 
 pub struct LocalMap<T>
 where
     T: Partition + Location + MaskMapState + Visualize,
 {
     map: T,
-    my_position: Coords,
-    other_positions: Vec<Coords>,
+    my_position: RealWorldLocation,
+    other_positions: Vec<RealWorldLocation>,
 }
 
 impl<T> LocalMap<T>
@@ -15,8 +15,8 @@ where
 {
     pub fn new(
         map: T,
-        my_position: Coords,
-        other_positions: Vec<Coords>,
+        my_position: RealWorldLocation,
+        other_positions: Vec<RealWorldLocation>,
     ) -> Self {
         Self {
             map,
@@ -28,16 +28,11 @@ where
     pub fn map(&self) -> &T {
         &self.map
     }
-    pub fn my_position(&self) -> &Coords {
+    pub fn my_position(&self) -> &RealWorldLocation {
         &self.my_position
     }
-    pub fn other_positions(&self) -> &Vec<Coords> {
+    pub fn other_positions(&self) -> &Vec<RealWorldLocation> {
         &self.other_positions
-    }
-
-    fn update_my_position(&mut self, new_position: Coords) {
-        self.my_position = new_position;
-        self.map();
     }
 }
 
@@ -80,8 +75,8 @@ mod tests {
     }
 
     fn make_random_local_map(
-        my_position: Coords,
-        other_positions: Vec<Coords>,
+        my_position: RealWorldLocation,
+        other_positions: Vec<RealWorldLocation>,
     ) -> LocalMap<CellMap> {
         let (map, _) = make_map();
 
@@ -89,8 +84,8 @@ mod tests {
     }
 
     fn make_local_map(
-        my_position: Coords,
-        other_positions: Vec<Coords>,
+        my_position: RealWorldLocation,
+        other_positions: Vec<RealWorldLocation>,
     ) -> LocalMap<CellMap> {
         LocalMap::new(
             CellMap::new(
@@ -106,20 +101,20 @@ mod tests {
     fn get_mapstate_pos_from_map(
         map: &CellMap,
         state: MapState,
-    ) -> Vec<Coords> {
+    ) -> Vec<RealWorldLocation> {
         map.get_map_state(state)
             .iter()
-            .map(|cell| Coords::new(*cell.x(), *cell.y(), 0.0))
+            .map(|cell| cell.location().clone())
             .collect()
     }
 
     #[test]
     fn get_my_position() {
-        let my_position = Coords::new(0.0, 0.0, 0.0);
+        let my_position = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
         let other_positions = vec![];
 
         let lmap = make_local_map(my_position, other_positions);
-        let my_map_pos: Vec<Coords> =
+        let my_map_pos: Vec<RealWorldLocation> =
             get_mapstate_pos_from_map(lmap.map(), MapState::MyRobot);
 
         assert_eq!(
@@ -132,7 +127,7 @@ mod tests {
 
     #[test]
     fn create_local_map_other_positions_no_robots() {
-        let my_position = Coords::new(0.0, 0.0, 0.0);
+        let my_position = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
         let other_positions = vec![];
 
         let lmap = make_local_map(my_position, other_positions);
@@ -145,8 +140,8 @@ mod tests {
 
     #[test]
     fn create_local_map_other_positions_one_robots() {
-        let my_position = Coords::new(0.0, 0.0, 0.0);
-        let other_positions = vec![Coords::new(1.0, 1.0, 0.0)];
+        let my_position = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
+        let other_positions = vec![RealWorldLocation::from_xyz(1.0, 1.0, 0.0)];
 
         let lmap = make_local_map(my_position, other_positions);
         let positions =
@@ -158,11 +153,11 @@ mod tests {
 
     #[test]
     fn create_local_map_other_positions_multiple_robots() {
-        let my_position = Coords::new(0.0, 0.0, 0.0);
+        let my_position = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
         let other_positions = vec![
-            Coords::new(1.0, 1.0, 0.0),
-            Coords::new(2.0, 2.0, 0.0),
-            Coords::new(3.0, 3.0, 0.0),
+            RealWorldLocation::from_xyz(1.0, 1.0, 0.0),
+            RealWorldLocation::from_xyz(2.0, 2.0, 0.0),
+            RealWorldLocation::from_xyz(3.0, 3.0, 0.0),
         ];
 
         let lmap = make_local_map(my_position, other_positions);
@@ -175,26 +170,26 @@ mod tests {
 
     #[test]
     fn get_map() {
-        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
         let (map, _) = make_map();
         assert_eq!(lmap.map(), &map);
     }
 
     #[test]
     fn partition_map() {
-        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
         lmap.partition();
     }
 
     #[test]
     fn call_map_trait_function_visualize() {
-        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
         lmap.map().as_image();
     }
 
     #[test]
     fn call_map_trait_function_visualize_and_then_save() {
-        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
         lmap.map()
             .as_image()
             .save("test_save_local_map.jpg")
@@ -203,7 +198,7 @@ mod tests {
 
     #[test]
     fn call_map_trait_function_mask_mapstate() {
-        let lmap = make_random_local_map(Coords::new(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
         lmap.map().get_map_state(MapState::Unexplored);
     }
 }

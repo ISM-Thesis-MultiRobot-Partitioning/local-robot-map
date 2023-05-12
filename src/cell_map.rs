@@ -293,6 +293,9 @@ impl<'a> Cell<'a> {
         }
     }
 
+    pub fn location(&self) -> &RealWorldLocation {
+        &self.location
+    }
     pub fn x(&self) -> &f64 {
         &self.location.x
     }
