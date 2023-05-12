@@ -94,13 +94,11 @@ pub trait Partition {
 
 /// Retrieve a subarea of the map based on a condition.
 pub trait Mask {
-    /// The Type contained in the map cells
-    type CellType;
     /// Retrieve a subarea of the map by filtering the locations based on a
     /// condition.
     fn get_map_region(
         &self,
-        filter: impl Fn(Self::CellType) -> bool,
+        filter: impl Fn(LocationType) -> bool,
     ) -> Vec<Cell>;
 }
 
@@ -113,8 +111,6 @@ pub trait MaskMapState {
 }
 
 impl<T: Mask> MaskMapState for T
-where
-    <T as Mask>::CellType: PartialEq<MapState>,
 {
     fn get_map_state(&self, state: MapState) -> Vec<Cell> {
         self.get_map_region(|e| e == state)
@@ -197,8 +193,6 @@ impl MapState {
 /// functions then take care of transparently converting the coordinates
 /// accordingly.
 pub trait Location {
-    /// The Type contained in the map locations
-    type LocationType;
     /// Retrieve the value at the given location.
     ///
     /// If the location can be successfully accessed, an `Ok(value)` will be
@@ -211,7 +205,7 @@ pub trait Location {
     fn get_location(
         &self,
         coord: &RealWorldLocation,
-    ) -> Result<Self::LocationType, LocationError>;
+    ) -> Result<LocationType, LocationError>;
     /// Updates the given location in the map with a new value.
     ///
     /// If a value was already present at the given location, it should be
@@ -224,7 +218,7 @@ pub trait Location {
     fn set_location(
         &mut self,
         coord: &RealWorldLocation,
-        value: Self::LocationType,
+        value: LocationType,
     ) -> Result<(), LocationError>;
 }
 

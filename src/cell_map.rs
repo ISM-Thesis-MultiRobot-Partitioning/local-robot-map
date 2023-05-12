@@ -230,11 +230,9 @@ impl Visualize for CellMap {
 }
 
 impl Mask for CellMap {
-    type CellType = LocationType;
-
     fn get_map_region(
         &self,
-        filter: impl Fn(Self::CellType) -> bool,
+        filter: impl Fn(LocationType) -> bool,
     ) -> Vec<Cell> {
         self.cells
             .indexed_iter()
@@ -258,12 +256,10 @@ impl Mask for CellMap {
 }
 
 impl Location for CellMap {
-    type LocationType = LocationType;
-
     fn get_location(
         &self,
         coord: &RealWorldLocation,
-    ) -> Result<Self::LocationType, crate::LocationError> {
+    ) -> Result<LocationType, crate::LocationError> {
         let index = self.location_to_map_index(coord)?;
         Ok(self.cells[index])
     }
@@ -271,7 +267,7 @@ impl Location for CellMap {
     fn set_location(
         &mut self,
         coord: &RealWorldLocation,
-        value: Self::LocationType,
+        value: LocationType,
     ) -> Result<(), crate::LocationError> {
         let index = self.location_to_map_index(coord)?;
         self.cells[index] = value;
