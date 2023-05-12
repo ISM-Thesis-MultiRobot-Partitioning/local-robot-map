@@ -64,7 +64,7 @@ where
 mod tests {
     use super::*;
     use crate::{
-        cell_map::tests::make_map, CellMap, MapState, RealWorldLocation,
+        cell_map::tests::make_map, CellMap, LocationType, RealWorldLocation,
     };
 
     // dummy implementation for testing purposes
@@ -100,7 +100,7 @@ mod tests {
 
     fn get_mapstate_pos_from_map(
         map: &CellMap,
-        state: MapState,
+        state: LocationType,
     ) -> Vec<RealWorldLocation> {
         map.get_map_state(state)
             .iter()
@@ -115,7 +115,7 @@ mod tests {
 
         let lmap = make_local_map(my_position, other_positions);
         let my_map_pos: Vec<RealWorldLocation> =
-            get_mapstate_pos_from_map(lmap.map(), MapState::MyRobot);
+            get_mapstate_pos_from_map(lmap.map(), LocationType::MyRobot);
 
         assert_eq!(
             my_map_pos.len(),
@@ -132,7 +132,7 @@ mod tests {
 
         let lmap = make_local_map(my_position, other_positions);
         let positions =
-            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+            get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 0, "There should only be no other robots");
         assert_eq!(lmap.other_positions(), &positions);
@@ -145,7 +145,7 @@ mod tests {
 
         let lmap = make_local_map(my_position, other_positions);
         let positions =
-            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+            get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 1, "There should only be 1 other robots");
         assert_eq!(lmap.other_positions(), &positions);
@@ -162,7 +162,7 @@ mod tests {
 
         let lmap = make_local_map(my_position, other_positions);
         let positions =
-            get_mapstate_pos_from_map(lmap.map(), MapState::OtherRobot);
+            get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 3, "There should only be 3 other robots");
         assert_eq!(lmap.other_positions(), &positions);
@@ -199,6 +199,6 @@ mod tests {
     #[test]
     fn call_map_trait_function_mask_mapstate() {
         let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
-        lmap.map().get_map_state(MapState::Unexplored);
+        lmap.map().get_map_state(LocationType::Unexplored);
     }
 }

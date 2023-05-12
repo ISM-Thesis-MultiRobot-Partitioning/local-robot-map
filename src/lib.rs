@@ -31,7 +31,8 @@ pub use polygon_map::PolygonMap;
 
 pub use local_map::LocalMap;
 
-pub type MapStateMatrix = Array2<MapState>;
+pub type LocationType = MapState;
+pub type MapStateMatrix = Array2<LocationType>;
 
 /// Visualize a map.
 pub trait Visualize {
@@ -52,9 +53,9 @@ pub trait Visualize {
     ///
     /// # Implementation tip
     ///
-    /// Check out the [`MapState::to_luma`] and [`MapState::to_rgb`]
+    /// Check out the [`LocationType::to_luma`] and [`LocationType::to_rgb`]
     /// functions. They provide a central method for converting the
-    /// [`MapState`] variants to colors that can be used by the
+    /// [`LocationType`] variants to colors that can be used by the
     /// [`image::ImageBuffer`] being output in this function.
     fn as_image(&self) -> Self::ImageType;
     /// Visualize the map using a GUI window.

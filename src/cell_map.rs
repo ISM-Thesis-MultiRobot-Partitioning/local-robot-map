@@ -1,6 +1,6 @@
 use crate::{
     coords::InternalLocation, AxisResolution, Coords, Location, LocationError,
-    MapState, MapStateMatrix, Mask, RealWorldLocation, Visualize,
+    LocationType, MapStateMatrix, Mask, RealWorldLocation, Visualize,
 };
 use num::cast::ToPrimitive;
 
@@ -18,7 +18,7 @@ use image::{ImageBuffer, RgbImage};
 ///
 /// ```
 /// use local_robot_map::{
-///     AxisResolution, CellMap, Coords, MapState, RealWorldLocation,
+///     AxisResolution, CellMap, Coords, RealWorldLocation,
 /// };
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
@@ -48,7 +48,7 @@ use image::{ImageBuffer, RgbImage};
 ///
 /// ```
 /// use local_robot_map::{
-///     AxisResolution, CellMap, MapState, RealWorldLocation,
+///     AxisResolution, CellMap, RealWorldLocation,
 /// };
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
@@ -63,7 +63,7 @@ use image::{ImageBuffer, RgbImage};
 ///
 /// ```
 /// use local_robot_map::{
-///     AxisResolution, CellMap, MapState, RealWorldLocation,
+///     AxisResolution, CellMap, RealWorldLocation,
 /// };
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
@@ -113,7 +113,7 @@ impl CellMap {
                     rows.to_usize().expect("No conversion issues"),
                     columns.to_usize().expect("No conversion issues"),
                 ),
-                MapState::Unexplored,
+                LocationType::Unexplored,
             ),
             resolution,
             offset,
@@ -222,7 +222,7 @@ impl Visualize for CellMap {
             |x, y| -> image::Rgb<_> {
                 let row = y.to_usize().expect("No conversion issues");
                 let col = x.to_usize().expect("No conversion issues");
-                let cell: MapState = self.cells[[row, col]];
+                let cell: LocationType = self.cells[[row, col]];
                 cell.to_rgb()
             },
         )
@@ -230,7 +230,7 @@ impl Visualize for CellMap {
 }
 
 impl Mask for CellMap {
-    type CellType = MapState;
+    type CellType = LocationType;
 
     fn get_map_region(
         &self,
@@ -258,7 +258,7 @@ impl Mask for CellMap {
 }
 
 impl Location for CellMap {
-    type LocationType = MapState;
+    type LocationType = LocationType;
 
     fn get_location(
         &self,
@@ -282,11 +282,11 @@ impl Location for CellMap {
 #[derive(Debug, PartialEq)]
 pub struct Cell<'a> {
     location: RealWorldLocation,
-    value: &'a MapState,
+    value: &'a LocationType,
 }
 
 impl<'a> Cell<'a> {
-    pub(crate) fn new(location: InternalLocation, value: &'a MapState) -> Self {
+    pub(crate) fn new(location: InternalLocation, value: &'a LocationType) -> Self {
         Self {
             location: location.into_real_world(),
             value,
@@ -302,7 +302,7 @@ impl<'a> Cell<'a> {
     pub fn y(&self) -> &f64 {
         &self.location.y
     }
-    pub fn value(&self) -> &'a MapState {
+    pub fn value(&self) -> &'a LocationType {
         self.value
     }
 }
@@ -317,13 +317,13 @@ pub mod tests {
 
     pub fn make_map() -> (CellMap, Coords) {
         let ms = HashMap::from([
-            ("OOM", MapState::OutOfMap),
-            ("OTR", MapState::OtherRobot),
-            ("MYR", MapState::MyRobot),
-            ("EXP", MapState::Explored),
-            ("UNE", MapState::Unexplored),
-            ("FNT", MapState::Frontier),
-            ("ASS", MapState::Assigned),
+            ("OOM", LocationType::OutOfMap),
+            ("OTR", LocationType::OtherRobot),
+            ("MYR", LocationType::MyRobot),
+            ("EXP", LocationType::Explored),
+            ("UNE", LocationType::Unexplored),
+            ("FNT", LocationType::Frontier),
+            ("ASS", LocationType::Assigned),
         ]);
 
         let offset = Coords::new(0.0, 0.0, 0.0);
@@ -564,7 +564,7 @@ pub mod tests {
     fn submap_get_map_region() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_region(|e| e == MapState::OutOfMap);
+        let cells = map.get_map_region(|e| e == LocationType::OutOfMap);
 
         assert_eq!(cells.len(), 2);
         assert_eq!(
@@ -573,12 +573,12 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::OutOfMap
+                    &LocationType::OutOfMap
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::OutOfMap
+                    &LocationType::OutOfMap
                 ),
             ]
         );
@@ -588,7 +588,7 @@ pub mod tests {
     fn submap_get_out_of_map() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_state(MapState::OutOfMap);
+        let cells = map.get_map_state(LocationType::OutOfMap);
 
         assert_eq!(cells.len(), 2);
         assert_eq!(
@@ -597,12 +597,12 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::OutOfMap
+                    &LocationType::OutOfMap
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::OutOfMap
+                    &LocationType::OutOfMap
                 ),
             ]
         );
@@ -612,7 +612,7 @@ pub mod tests {
     fn submap_get_explored() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_state(MapState::Explored);
+        let cells = map.get_map_state(LocationType::Explored);
 
         assert_eq!(cells.len(), 2);
         assert_eq!(
@@ -621,12 +621,12 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Explored
+                    &LocationType::Explored
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Explored
+                    &LocationType::Explored
                 ),
             ]
         );
@@ -636,7 +636,7 @@ pub mod tests {
     fn submap_get_unexplored() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_state(MapState::Unexplored);
+        let cells = map.get_map_state(LocationType::Unexplored);
 
         assert_eq!(cells.len(), 3);
         assert_eq!(
@@ -645,17 +645,17 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Unexplored
+                    &LocationType::Unexplored
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Unexplored
+                    &LocationType::Unexplored
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Unexplored
+                    &LocationType::Unexplored
                 ),
             ]
         );
@@ -665,7 +665,7 @@ pub mod tests {
     fn submap_get_frontier() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_state(MapState::Frontier);
+        let cells = map.get_map_state(LocationType::Frontier);
 
         assert_eq!(cells.len(), 2);
         assert_eq!(
@@ -674,12 +674,12 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Frontier
+                    &LocationType::Frontier
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Frontier
+                    &LocationType::Frontier
                 ),
             ]
         );
@@ -689,7 +689,7 @@ pub mod tests {
     fn submap_get_assigned() {
         let (map, offset) = make_map();
 
-        let cells = map.get_map_state(MapState::Assigned);
+        let cells = map.get_map_state(LocationType::Assigned);
 
         assert_eq!(cells.len(), 2);
         assert_eq!(
@@ -698,12 +698,12 @@ pub mod tests {
                 Cell::new(
                     InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Assigned
+                    &LocationType::Assigned
                 ),
                 Cell::new(
                     InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset)
                         .unwrap(),
-                    &MapState::Assigned
+                    &LocationType::Assigned
                 ),
             ]
         );

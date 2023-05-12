@@ -4,7 +4,7 @@ use num::ToPrimitive;
 
 use crate::cell_map::CellMap;
 use crate::coords::{AxisResolution, Coords};
-use crate::{MapState, MapStateMatrix, RealWorldLocation};
+use crate::{LocationType, MapStateMatrix, RealWorldLocation};
 
 /// Describe a map using a polygon.
 ///
@@ -114,8 +114,8 @@ impl PolygonMap {
             .expect("There should be no NaN of infinite values");
 
         let cells = rasterizer.finish().map(|e| match e {
-            true => MapState::Unexplored,
-            false => MapState::OutOfMap,
+            true => LocationType::Unexplored,
+            false => LocationType::OutOfMap,
         });
 
         (cells, offset)
@@ -129,10 +129,10 @@ impl PolygonMap {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MapState;
+    use crate::LocationType;
 
-    const OOM: MapState = MapState::OutOfMap;
-    const UNE: MapState = MapState::Unexplored;
+    const OOM: LocationType = LocationType::OutOfMap;
+    const UNE: LocationType = LocationType::Unexplored;
 
     /// Note how the rasterized polygon seems tilted to the right and not
     /// perfectly centered/symmetric. I assume this is an artifact from the
