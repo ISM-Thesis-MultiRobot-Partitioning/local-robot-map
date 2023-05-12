@@ -110,8 +110,7 @@ pub trait MaskMapState {
     fn get_map_state(&self, state: MapState) -> Vec<Cell>;
 }
 
-impl<T: Mask> MaskMapState for T
-{
+impl<T: Mask> MaskMapState for T {
     fn get_map_state(&self, state: MapState) -> Vec<Cell> {
         self.get_map_region(|e| e == state)
     }
