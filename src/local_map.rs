@@ -206,19 +206,28 @@ mod tests {
 
     #[test]
     fn partition_map() {
-        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
         lmap.partition();
     }
 
     #[test]
     fn call_map_trait_function_visualize() {
-        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
         lmap.map().as_image();
     }
 
     #[test]
     fn call_map_trait_function_visualize_and_then_save() {
-        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
         lmap.map()
             .as_image()
             .save("test_save_local_map.jpg")
@@ -227,7 +236,10 @@ mod tests {
 
     #[test]
     fn call_map_trait_function_mask_mapstate() {
-        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
+        let lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
         lmap.map().get_map_state(LocationType::Unexplored);
     }
 }
