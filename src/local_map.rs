@@ -3,19 +3,19 @@ use crate::{
     RealWorldLocation, Visualize,
 };
 
-#[derive(Debug)]
 pub struct LocalMap<T>
 where
-    T: Partition + Location + MaskMapState + Visualize,
+    T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
     map: T,
     my_position: RealWorldLocation,
     other_positions: Vec<RealWorldLocation>,
+    partition_algorithm: Option<Box<dyn FnOnce(Self) -> Self>>,
 }
 
 impl<T> LocalMap<T>
 where
-    T: Partition + Location + MaskMapState + Visualize,
+    T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
     /// Create a [`LocalMap`] which does not allow out-of-map robots.
     ///
@@ -51,6 +51,7 @@ where
             map,
             my_position,
             other_positions,
+            partition_algorithm: None,
         })
     }
 
@@ -75,25 +76,46 @@ where
 
 impl<T> Partition for LocalMap<T>
 where
-    T: Partition + Location + MaskMapState + Visualize,
+    T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
-    fn partition(self) -> Self {
-        Self {
-            map: self.map.partition(),
-            my_position: self.my_position,
-            other_positions: self.other_positions,
-        }
+    fn set_partition_algorithm(
+        &mut self,
+        algorithm: Box<dyn FnOnce(Self) -> Self>,
+    ) {
+        self.partition_algorithm = Some(algorithm);
+    }
+
+    fn get_partition_algorithm(
+        &mut self,
+    ) -> &mut Option<Box<dyn FnOnce(Self) -> Self>> {
+        &mut self.partition_algorithm
     }
 }
 
 impl<T> Visualize for LocalMap<T>
 where
-    T: Partition + Location + MaskMapState + Visualize,
+    T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
     type ImageType = <T as Visualize>::ImageType;
 
     fn as_image(&self) -> Self::ImageType {
         self.map.as_image()
+    }
+}
+
+impl<T> std::fmt::Debug for LocalMap<T>
+where
+    T: Location + MaskMapState + Visualize + std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "LocalMap: map = {:?}, my_position = {:?}, other_positions = {:?}, partition_algorithm provided? = {}",
+            self.map,
+            self.my_position,
+            self.other_positions,
+            self.partition_algorithm.is_some(),
+        )
     }
 }
 
@@ -103,13 +125,6 @@ mod tests {
     use crate::{
         cell_map::tests::make_map, CellMap, LocationType, RealWorldLocation,
     };
-
-    // dummy implementation for testing purposes
-    impl Partition for CellMap {
-        fn partition(self) -> Self {
-            self
-        }
-    }
 
     fn make_random_local_map(
         my_position: RealWorldLocation,
@@ -862,12 +877,32 @@ mod tests {
     }
 
     #[test]
-    fn partition_map() {
-        let lmap = make_random_local_map(
+    fn partition_map_closure() {
+        let mut lmap = make_random_local_map(
             RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
             vec![],
         );
-        lmap.partition();
+
+        // set dummy algorithm for the test
+        lmap.set_partition_algorithm(Box::new(|map| { map }));
+
+        let _partitioned_map = lmap.partition();
+    }
+
+    #[test]
+    fn partition_map_function() {
+        let mut lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
+
+        // set dummy algorithm for the test
+        fn algorithm(map: LocalMap<CellMap>) -> LocalMap<CellMap> {
+            map
+        }
+        lmap.set_partition_algorithm(Box::new(algorithm));
+
+        let _partitioned_map = lmap.partition();
     }
 
     #[test]
