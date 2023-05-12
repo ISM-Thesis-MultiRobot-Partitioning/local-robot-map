@@ -150,16 +150,40 @@ mod tests {
     fn new_noexpand_robots_in_map() {
         const OFFSET: f64 = 5.0;
         let lmap = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_noexpand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -175,16 +199,40 @@ mod tests {
     fn new_noexpand_myrobot_out_of_map() {
         const OFFSET: f64 = 5.0;
         let lmap = {
-            let my_position = RealWorldLocation::from_xyz(11.0 - OFFSET, 11.0 - OFFSET, 11.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                11.0 - OFFSET,
+                11.0 - OFFSET,
+                11.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_noexpand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -196,7 +244,11 @@ mod tests {
             lmap.unwrap_err(),
             (
                 LocationError::OutOfMap,
-                RealWorldLocation::from_xyz(11.0 - OFFSET, 11.0 - OFFSET, 11.0 - OFFSET)
+                RealWorldLocation::from_xyz(
+                    11.0 - OFFSET,
+                    11.0 - OFFSET,
+                    11.0 - OFFSET
+                )
             )
         )
     }
@@ -205,16 +257,40 @@ mod tests {
     fn new_noexpand_other_robot_out_of_map() {
         const OFFSET: f64 = 5.0;
         let lmap = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(-1.0 - OFFSET, -1.0 - OFFSET, -1.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    -1.0 - OFFSET,
+                    -1.0 - OFFSET,
+                    -1.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_noexpand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -226,7 +302,11 @@ mod tests {
             lmap.unwrap_err(),
             (
                 LocationError::OutOfMap,
-                RealWorldLocation::from_xyz(-1.0 - OFFSET, -1.0 - OFFSET, -1.0 - OFFSET)
+                RealWorldLocation::from_xyz(
+                    -1.0 - OFFSET,
+                    -1.0 - OFFSET,
+                    -1.0 - OFFSET
+                )
             )
         )
     }
@@ -235,16 +315,40 @@ mod tests {
     fn new_noexpand_multiple_other_robot_out_of_map() {
         const OFFSET: f64 = 5.0;
         let lmap = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(12.0 - OFFSET, 12.0 - OFFSET, 12.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(-4.0 - OFFSET, -4.0 - OFFSET, -4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    12.0 - OFFSET,
+                    12.0 - OFFSET,
+                    12.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    -4.0 - OFFSET,
+                    -4.0 - OFFSET,
+                    -4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_noexpand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -256,7 +360,11 @@ mod tests {
             lmap.unwrap_err(),
             (
                 LocationError::OutOfMap,
-                RealWorldLocation::from_xyz(12.0 - OFFSET, 12.0 - OFFSET, 12.0 - OFFSET)
+                RealWorldLocation::from_xyz(
+                    12.0 - OFFSET,
+                    12.0 - OFFSET,
+                    12.0 - OFFSET
+                )
             )
         )
     }
@@ -265,16 +373,40 @@ mod tests {
     fn new_expand_robots_in_map() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -289,16 +421,40 @@ mod tests {
     fn new_expand_robot_right() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(16.84 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                16.84 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -313,16 +469,40 @@ mod tests {
     fn new_expand_robot_right_up() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(13.47 - OFFSET, 17.08 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    13.47 - OFFSET,
+                    17.08 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -337,16 +517,40 @@ mod tests {
     fn new_expand_robot_up() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 14.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    14.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -361,16 +565,40 @@ mod tests {
     fn new_expand_robot_left_up() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(-1.87 - OFFSET, 12.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    -1.87 - OFFSET,
+                    12.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -385,16 +613,40 @@ mod tests {
     fn new_expand_robot_left() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(-4.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                -4.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -409,16 +661,40 @@ mod tests {
     fn new_expand_robot_left_down() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(-3.92 - OFFSET, -1.35 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    -3.92 - OFFSET,
+                    -1.35 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -433,16 +709,40 @@ mod tests {
     fn new_expand_robot_down() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, -3.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                -3.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(3.0 - OFFSET, 3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
@@ -457,16 +757,40 @@ mod tests {
     fn new_expand_robot_right_down() {
         const OFFSET: f64 = 5.0;
         let map = {
-            let my_position = RealWorldLocation::from_xyz(1.0 - OFFSET, 1.0 - OFFSET, 1.0 - OFFSET);
+            let my_position = RealWorldLocation::from_xyz(
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+                1.0 - OFFSET,
+            );
             let other_positions = vec![
-                RealWorldLocation::from_xyz(2.0 - OFFSET, 2.0 - OFFSET, 2.0 - OFFSET),
-                RealWorldLocation::from_xyz(13.0 - OFFSET, -3.0 - OFFSET, 3.0 - OFFSET),
-                RealWorldLocation::from_xyz(4.0 - OFFSET, 4.0 - OFFSET, 4.0 - OFFSET),
+                RealWorldLocation::from_xyz(
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                    2.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    13.0 - OFFSET,
+                    -3.0 - OFFSET,
+                    3.0 - OFFSET,
+                ),
+                RealWorldLocation::from_xyz(
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                    4.0 - OFFSET,
+                ),
             ];
             LocalMap::new_expand(
                 CellMap::new(
-                    RealWorldLocation::from_xyz(0.0 - OFFSET, 0.0 - OFFSET, 0.0 - OFFSET),
-                    RealWorldLocation::from_xyz(10.0 - OFFSET, 10.0 - OFFSET, 10.0 - OFFSET),
+                    RealWorldLocation::from_xyz(
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                        0.0 - OFFSET,
+                    ),
+                    RealWorldLocation::from_xyz(
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                        10.0 - OFFSET,
+                    ),
                     crate::AxisResolution::uniform(1.0),
                 ),
                 my_position,
