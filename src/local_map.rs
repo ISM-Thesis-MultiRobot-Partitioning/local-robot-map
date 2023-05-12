@@ -1,4 +1,7 @@
-use crate::{Location, MaskMapState, Partition, Visualize, RealWorldLocation};
+use crate::{
+    Location, LocationError, MapState, MaskMapState, Partition,
+    RealWorldLocation, Visualize,
+};
 
 pub struct LocalMap<T>
 where
@@ -13,16 +16,49 @@ impl<T> LocalMap<T>
 where
     T: Partition + Location + MaskMapState + Visualize,
 {
-    pub fn new(
-        map: T,
+    /// Create a [`LocalMap`] which does not allow out-of-map robots.
+    ///
+    /// If a robot happens to be placed outside the map area, it will be
+    /// considered [`LocationError::OutOfMap`]. See also [`LoalMap::new_expand`]
+    /// which can deal with out-of-map robots.
+    ///
+    /// # Errors
+    ///
+    /// If a robot is placed such that a [`LocationError`] occurs, the function
+    /// will return both the error in question as well as the provided
+    /// coordinate of the offending robot.
+    pub fn new_noexpand(
+        mut map: T,
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, (LocationError, RealWorldLocation)> {
+        if let Err(location_error) =
+            map.set_location(&my_position, MapState::MyRobot)
+        {
+            return Err((location_error, my_position));
+        };
+
+        for pos in &other_positions {
+            if let Err(location_error) =
+                map.set_location(pos, MapState::OtherRobot)
+            {
+                return Err((location_error, pos.clone()));
+            }
+        }
+
+        Ok(Self {
             map,
             my_position,
             other_positions,
-        }
+        })
+    }
+
+    pub fn new_expand(
+        mut map: T,
+        my_position: RealWorldLocation,
+        other_positions: Vec<RealWorldLocation>,
+    ) -> Self {
+        todo!()
     }
 
     pub fn map(&self) -> &T {
@@ -80,14 +116,14 @@ mod tests {
     ) -> LocalMap<CellMap> {
         let (map, _) = make_map();
 
-        LocalMap::new(map, my_position, other_positions)
+        LocalMap::new_noexpand(map, my_position, other_positions).unwrap()
     }
 
     fn make_local_map(
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
     ) -> LocalMap<CellMap> {
-        LocalMap::new(
+        LocalMap::new_noexpand(
             CellMap::new(
                 RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
                 RealWorldLocation::from_xyz(10.0, 10.0, 10.0),
@@ -95,7 +131,7 @@ mod tests {
             ),
             my_position,
             other_positions,
-        )
+        ).unwrap()
     }
 
     fn get_mapstate_pos_from_map(
@@ -166,13 +202,6 @@ mod tests {
 
         assert_eq!(positions.len(), 3, "There should only be 3 other robots");
         assert_eq!(lmap.other_positions(), &positions);
-    }
-
-    #[test]
-    fn get_map() {
-        let lmap = make_random_local_map(RealWorldLocation::from_xyz(0.0, 0.0, 0.0), vec![]);
-        let (map, _) = make_map();
-        assert_eq!(lmap.map(), &map);
     }
 
     #[test]
