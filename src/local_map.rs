@@ -1,6 +1,6 @@
 use crate::{
-    Location, LocationError, MapState, MaskMapState, Partition, PartitionError,
-    RealWorldLocation, Visualize,
+    Algorithm, Location, LocationError, MapState, MaskMapState, Partition,
+    PartitionError, RealWorldLocation, Visualize,
 };
 
 pub struct LocalMap<T>
@@ -10,7 +10,7 @@ where
     map: T,
     my_position: RealWorldLocation,
     other_positions: Vec<RealWorldLocation>,
-    partition_algorithm: Option<Box<dyn FnOnce(Self) -> Self>>,
+    partition_algorithm: Option<Algorithm<Self>>,
 }
 
 impl<T> LocalMap<T>
@@ -73,6 +73,9 @@ where
     pub fn map(&self) -> &T {
         &self.map
     }
+    pub fn map_mut(&mut self) -> &mut T {
+        &mut self.map
+    }
     pub fn my_position(&self) -> &RealWorldLocation {
         &self.my_position
     }
@@ -85,17 +88,13 @@ impl<T> Partition for LocalMap<T>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
-    fn set_partition_algorithm(
-        &mut self,
-        algorithm: Box<dyn FnOnce(Self) -> Self>,
-    ) {
+    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self>) {
         self.partition_algorithm = Some(algorithm);
     }
 
     fn get_partition_algorithm(
         &mut self,
-    ) -> Result<&mut Option<Box<dyn FnOnce(Self) -> Self>>, PartitionError>
-    {
+    ) -> Result<&mut Option<Algorithm<Self>>, PartitionError> {
         match self.partition_algorithm {
             Some(_) => Ok(&mut self.partition_algorithm),
             None => Err(PartitionError::NoPartitioningAlgorithm),
