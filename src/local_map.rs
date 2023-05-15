@@ -60,7 +60,13 @@ where
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
     ) -> Self {
-        todo!()
+        #![allow(unused_variables, unused_mut)]
+        // dummy use of `change_offset` to remove warning
+        my_position
+            .into_internal(crate::Coords::new(0.0, 0.0, 0.0))
+            .unwrap()
+            .change_offset(crate::Coords::new(0.0, 0.0, 0.0)).unwrap();
+        todo!("")
     }
 
     pub fn map(&self) -> &T {

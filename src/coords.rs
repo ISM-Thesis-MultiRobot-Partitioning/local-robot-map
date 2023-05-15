@@ -273,6 +273,7 @@ impl InternalLocation {
     pub(crate) fn y(&self) -> f64 {
         self.location().y
     }
+    #[allow(dead_code)]
     pub(crate) fn z(&self) -> f64 {
         self.location().z
     }
