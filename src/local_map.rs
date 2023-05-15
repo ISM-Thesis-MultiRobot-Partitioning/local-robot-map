@@ -1,5 +1,5 @@
 use crate::{
-    Location, LocationError, MapState, MaskMapState, Partition,
+    Location, LocationError, MapState, MaskMapState, Partition, PartitionError,
     RealWorldLocation, Visualize,
 };
 
@@ -94,8 +94,12 @@ where
 
     fn get_partition_algorithm(
         &mut self,
-    ) -> &mut Option<Box<dyn FnOnce(Self) -> Self>> {
-        &mut self.partition_algorithm
+    ) -> Result<&mut Option<Box<dyn FnOnce(Self) -> Self>>, PartitionError>
+    {
+        match self.partition_algorithm {
+            Some(_) => Ok(&mut self.partition_algorithm),
+            None => Err(PartitionError::NoPartitioningAlgorithm),
+        }
     }
 }
 
@@ -893,7 +897,7 @@ mod tests {
         // set dummy algorithm for the test
         lmap.set_partition_algorithm(Box::new(|map| map));
 
-        let _partitioned_map = lmap.partition();
+        let _partitioned_map = lmap.partition().expect("No error partitioning");
     }
 
     #[test]
@@ -909,7 +913,18 @@ mod tests {
         }
         lmap.set_partition_algorithm(Box::new(algorithm));
 
-        let _partitioned_map = lmap.partition();
+        let _partitioned_map = lmap.partition().expect("No error partitioning");
+    }
+
+    #[test]
+    fn partition_map_no_algorithm() {
+        let lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
+
+        let partitioned_map = lmap.partition().unwrap_err();
+        assert_eq!(partitioned_map, PartitionError::NoPartitioningAlgorithm);
     }
 
     #[test]

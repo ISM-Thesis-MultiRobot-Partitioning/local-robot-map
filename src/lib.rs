@@ -89,13 +89,16 @@ pub trait Visualize {
 /// each implement the partitioning in any way they see fit.
 pub trait Partition {
     /// Consumes the map and returns the partitioned version thereof.
-    fn partition(mut self) -> Self
+    fn partition(mut self) -> Result<Self, PartitionError>
     where
         Self: Sized,
     {
-        self.get_partition_algorithm()
+        Ok(self
+            .get_partition_algorithm()?
             .take()
-            .expect("No partitioning algorithm was provided")(self)
+            .expect("Partitioning algorithm was provided")(
+            self
+        ))
     }
     fn set_partition_algorithm(
         &mut self,
@@ -103,7 +106,12 @@ pub trait Partition {
     );
     fn get_partition_algorithm(
         &mut self,
-    ) -> &mut Option<Box<dyn FnOnce(Self) -> Self>>;
+    ) -> Result<&mut Option<Box<dyn FnOnce(Self) -> Self>>, PartitionError>;
+}
+
+#[derive(Debug, PartialEq)]
+pub enum PartitionError {
+    NoPartitioningAlgorithm,
 }
 
 /// Retrieve a subarea of the map based on a condition.
