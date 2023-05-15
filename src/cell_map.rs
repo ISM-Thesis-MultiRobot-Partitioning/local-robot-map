@@ -282,7 +282,10 @@ pub struct Cell<'a> {
 }
 
 impl<'a> Cell<'a> {
-    pub(crate) fn new(location: InternalLocation, value: &'a LocationType) -> Self {
+    pub(crate) fn new(
+        location: InternalLocation,
+        value: &'a LocationType,
+    ) -> Self {
         Self {
             location: location.into_real_world(),
             value,

@@ -65,7 +65,8 @@ where
         my_position
             .into_internal(crate::Coords::new(0.0, 0.0, 0.0))
             .unwrap()
-            .change_offset(crate::Coords::new(0.0, 0.0, 0.0)).unwrap();
+            .change_offset(crate::Coords::new(0.0, 0.0, 0.0))
+            .unwrap();
         todo!("")
     }
 
@@ -890,7 +891,7 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        lmap.set_partition_algorithm(Box::new(|map| { map }));
+        lmap.set_partition_algorithm(Box::new(|map| map));
 
         let _partitioned_map = lmap.partition();
     }

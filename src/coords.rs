@@ -260,7 +260,10 @@ impl InternalLocation {
     /// provide to [`RealWorldLocation::into_internal`]). The implementation
     /// should take care of calculating the relative offset, and thus alleviate
     /// the programmer.
-    pub(crate) fn change_offset(self, offset: Coords) -> Result<Self, (LocationError, Self)> {
+    pub(crate) fn change_offset(
+        self,
+        offset: Coords,
+    ) -> Result<Self, (LocationError, Self)> {
         self.into_real_world().into_internal(offset)
     }
 
@@ -403,7 +406,9 @@ mod tests {
 
         let internal_locations: Vec<InternalLocation> = external_locations
             .into_iter()
-            .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
+            .map(|loc| {
+                loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap()
+            })
             .collect();
 
         assert_eq!(
@@ -469,7 +474,9 @@ mod tests {
         let offset_internal_locations: Vec<InternalLocation> =
             internal_locations
                 .into_iter()
-                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap())
+                .map(|iloc| {
+                    iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap()
+                })
                 .collect();
 
         assert_eq!(
@@ -499,7 +506,9 @@ mod tests {
         let offset_internal_locations: Vec<InternalLocation> =
             internal_locations
                 .into_iter()
-                .map(|iloc| iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap())
+                .map(|iloc| {
+                    iloc.change_offset(Coords::new(-2.0, -2.0, -2.0)).unwrap()
+                })
                 .collect();
 
         let external_locations: Vec<RealWorldLocation> =

@@ -101,8 +101,9 @@ pub trait Partition {
         &mut self,
         algorithm: Box<dyn FnOnce(Self) -> Self>,
     );
-    fn get_partition_algorithm(&mut self)
-        -> &mut Option<Box<dyn FnOnce(Self) -> Self>>;
+    fn get_partition_algorithm(
+        &mut self,
+    ) -> &mut Option<Box<dyn FnOnce(Self) -> Self>>;
 }
 
 /// Retrieve a subarea of the map based on a condition.
