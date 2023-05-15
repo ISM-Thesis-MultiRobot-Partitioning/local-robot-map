@@ -33,7 +33,7 @@ pub use local_map::LocalMap;
 
 pub type LocationType = MapState;
 pub type MapStateMatrix = Array2<LocationType>;
-pub(crate) type Algorithm<T> = Box<dyn FnOnce(T) -> T>;
+pub(crate) type Algorithm<T> = fn(T) -> T;
 
 /// Visualize a map.
 pub trait Visualize {
@@ -94,18 +94,15 @@ pub trait Partition {
     where
         Self: Sized,
     {
-        let partition_algorithm: Box<_> = self
+        let partition_algorithm = self
             .get_partition_algorithm()?
             .take()
             .expect("Partitioning algorithm was provided");
-        let map: Self = partition_algorithm(self);
-        // map.set_partition_algorithm(partition_algorithm);
+        let mut map: Self = partition_algorithm(self);
+        map.set_partition_algorithm(partition_algorithm);
         Ok(map)
     }
-    fn set_partition_algorithm(
-        &mut self,
-        algorithm: Algorithm<Self>
-    );
+    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self>);
     fn get_partition_algorithm(
         &mut self,
     ) -> Result<&mut Option<Algorithm<Self>>, PartitionError>;

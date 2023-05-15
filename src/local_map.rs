@@ -894,7 +894,7 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        lmap.set_partition_algorithm(Box::new(|map| map));
+        lmap.set_partition_algorithm(|map| map);
 
         let _partitioned_map = lmap.partition().expect("No error partitioning");
     }
@@ -910,9 +910,30 @@ mod tests {
         fn algorithm(map: LocalMap<CellMap>) -> LocalMap<CellMap> {
             map
         }
-        lmap.set_partition_algorithm(Box::new(algorithm));
+        lmap.set_partition_algorithm(algorithm);
 
         let _partitioned_map = lmap.partition().expect("No error partitioning");
+    }
+
+    #[test]
+    fn partition_map_algorithm_is_transferred() {
+        let mut lmap = make_random_local_map(
+            RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
+            vec![],
+        );
+
+        // set dummy algorithm for the test
+        fn algorithm(map: LocalMap<CellMap>) -> LocalMap<CellMap> {
+            map
+        }
+        lmap.set_partition_algorithm(algorithm);
+
+        let mut partitioned_map =
+            lmap.partition().expect("No error partitioning");
+        let map_algorithm =
+            partitioned_map.get_partition_algorithm().unwrap().unwrap();
+        // function pointer equality: https://stackoverflow.com/a/57834304
+        assert_eq!(map_algorithm as usize, algorithm as usize);
     }
 
     #[test]
