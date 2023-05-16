@@ -198,6 +198,20 @@ impl MapState {
     }
 }
 
+impl From<&MapState> for &str {
+    fn from(value: &MapState) -> Self {
+        match value {
+            MapState::OutOfMap => "OutOfMap",
+            MapState::OtherRobot => "OtherRobot",
+            MapState::MyRobot => "MyRobot",
+            MapState::Explored => "Explored",
+            MapState::Unexplored => "Unexplored",
+            MapState::Frontier => "Frontier",
+            MapState::Assigned => "Assigned",
+        }
+    }
+}
+
 /// Transparently translate between real-world coordinates and internal matrix
 /// coordinates.
 ///
