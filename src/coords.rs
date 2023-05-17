@@ -1,4 +1,4 @@
-use std::ops::{Add, Deref, Sub};
+use std::ops::{Add, Deref, Div, Mul, Sub};
 
 use crate::LocationError;
 
@@ -131,6 +131,28 @@ impl Sub for Coords {
     }
 }
 
+impl Div for Coords {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z)
+    }
+}
+
+impl Mul for Coords {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+    }
+}
+
+impl From<AxisResolution> for Coords {
+    fn from(value: AxisResolution) -> Self {
+        Self::new(value.x, value.y, value.z)
+    }
+}
+
 /// Explicitly describe real world coordinates.
 ///
 /// A thin wrapper around [`Coords`] which allows making a clear distinction
@@ -184,8 +206,13 @@ impl RealWorldLocation {
     pub(crate) fn into_internal(
         self,
         offset: Coords,
+        resolution: AxisResolution,
     ) -> Result<InternalLocation, (LocationError, InternalLocation)> {
-        InternalLocation::new(self.location - offset, offset)
+        InternalLocation::new(
+            (self.location - offset) * resolution.into(),
+            offset,
+            resolution,
+        )
     }
 
     pub fn location(&self) -> &Coords {
@@ -224,6 +251,7 @@ impl Deref for RealWorldLocation {
 pub(crate) struct InternalLocation {
     location: Coords,
     offset: Coords,
+    resolution: AxisResolution,
 }
 
 impl InternalLocation {
@@ -240,17 +268,25 @@ impl InternalLocation {
     pub(crate) fn new(
         location: Coords,
         offset: Coords,
+        resolution: AxisResolution,
     ) -> Result<Self, (LocationError, Self)> {
+        let iloc = Self {
+            location,
+            offset,
+            resolution,
+        };
         if location.x() >= 0.0 && location.y() >= 0.0 && location.z() >= 0.0 {
-            Ok(Self { location, offset })
+            Ok(iloc)
         } else {
-            Err((LocationError::OutOfMap, Self { location, offset }))
+            Err((LocationError::OutOfMap, iloc))
         }
     }
 
     /// Translate from internal location back to the original real-world one.
     pub(crate) fn into_real_world(self) -> RealWorldLocation {
-        RealWorldLocation::new(self.location + self.offset)
+        RealWorldLocation::new(
+            self.location / self.resolution.into() + self.offset,
+        )
     }
 
     /// Recompute the internal location given a new offset.
@@ -264,7 +300,8 @@ impl InternalLocation {
         self,
         offset: Coords,
     ) -> Result<Self, (LocationError, Self)> {
-        self.into_real_world().into_internal(offset)
+        let resolution = self.resolution;
+        self.into_real_world().into_internal(offset, resolution)
     }
 
     pub(crate) fn location(&self) -> &Coords {
@@ -335,7 +372,7 @@ impl InternalLocation {
 /// assert_eq!(map.width(), 1);
 /// assert_eq!(map.height(), 10);
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct AxisResolution {
     pub x: f64,
     pub y: f64,
@@ -407,7 +444,11 @@ mod tests {
         let internal_locations: Vec<InternalLocation> = external_locations
             .into_iter()
             .map(|loc| {
-                loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap()
+                loc.into_internal(
+                    Coords::new(-1.0, -1.0, -1.0),
+                    AxisResolution::uniform(1.0),
+                )
+                .unwrap()
             })
             .collect();
 
@@ -432,9 +473,24 @@ mod tests {
     fn internal_to_external_coords() {
         let offset = Coords::new(-1.0, -1.0, -1.0);
         let internal_locations: Vec<InternalLocation> = vec![
-            InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset).unwrap(),
-            InternalLocation::new(Coords::new(1.0, 1.0, 1.0), offset).unwrap(),
-            InternalLocation::new(Coords::new(2.0, 2.0, 2.0), offset).unwrap(),
+            InternalLocation::new(
+                Coords::new(0.0, 0.0, 0.0),
+                offset,
+                AxisResolution::uniform(1.0),
+            )
+            .unwrap(),
+            InternalLocation::new(
+                Coords::new(1.0, 1.0, 1.0),
+                offset,
+                AxisResolution::uniform(1.0),
+            )
+            .unwrap(),
+            InternalLocation::new(
+                Coords::new(2.0, 2.0, 2.0),
+                offset,
+                AxisResolution::uniform(1.0),
+            )
+            .unwrap(),
         ];
 
         let external_locations: Vec<RealWorldLocation> = internal_locations
@@ -468,7 +524,13 @@ mod tests {
             RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
         ]
         .into_iter()
-        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
+        .map(|loc| {
+            loc.into_internal(
+                Coords::new(-1.0, -1.0, -1.0),
+                AxisResolution::uniform(1.0),
+            )
+            .unwrap()
+        })
         .collect();
 
         let offset_internal_locations: Vec<InternalLocation> =
@@ -500,7 +562,13 @@ mod tests {
             RealWorldLocation::new(Coords::new(1.0, 1.0, 1.0)),
         ]
         .into_iter()
-        .map(|loc| loc.into_internal(Coords::new(-1.0, -1.0, -1.0)).unwrap())
+        .map(|loc| {
+            loc.into_internal(
+                Coords::new(-1.0, -1.0, -1.0),
+                AxisResolution::uniform(1.0),
+            )
+            .unwrap()
+        })
         .collect();
 
         let offset_internal_locations: Vec<InternalLocation> =

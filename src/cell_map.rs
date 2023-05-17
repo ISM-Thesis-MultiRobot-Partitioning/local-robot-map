@@ -160,16 +160,16 @@ impl CellMap {
         location: &RealWorldLocation,
     ) -> Result<[usize; 2], LocationError> {
         let coord: InternalLocation =
-            match location.clone().into_internal(self.offset) {
+            match location.clone().into_internal(self.offset, self.resolution) {
                 Ok(c) => c,
                 Err((location_error, _)) => return Err(location_error),
             };
 
-        let col: usize = (coord.x() * self.resolution().x)
+        let col: usize = coord.x()
             .floor()
             .to_usize()
             .expect("An overflow likely occured when converting f64 to usize");
-        let row: usize = (coord.y() * self.resolution().y)
+        let row: usize = coord.y()
             .floor()
             .to_usize()
             .expect("An overflow likely occured when converting f64 to usize");
@@ -238,6 +238,7 @@ impl Mask for CellMap {
                             0.0,
                         ),
                         *self.offset(),
+                        *self.resolution(),
                     )
                     .expect("indexed_iter() will not return negative indexes"),
                     e,
@@ -562,14 +563,65 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::OutOfMap
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn submap_get_map_region_high_resolution() {
+        const OOM: LocationType = LocationType::OutOfMap;
+        const OTR: LocationType = LocationType::OtherRobot;
+        let offset = Coords::new(-1.0, -1.0, 0.0);
+        let map = CellMap::from_raster(
+            MapStateMatrix::from_shape_vec(
+                (10, 10),
+                vec![
+                    OTR, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OTR, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OTR, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                    OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, OOM, //
+                ],
+            )
+            .unwrap(),
+            AxisResolution::uniform(5.0),
+            offset,
+        );
+
+        let cells = map.get_map_region(|e| e == OTR);
+
+        assert_eq!(cells.len(), 3);
+        assert_eq!(
+            cells,
+            vec![
+                Cell::new(
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
+                        .unwrap(),
+                    &OTR
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(8.0, 3.0, 0.0), offset, *map.resolution())
+                        .unwrap(),
+                    &OTR
+                ),
+                Cell::new(
+                    InternalLocation::new(Coords::new(5.0, 5.0, 0.0), offset, *map.resolution())
+                        .unwrap(),
+                    &OTR
                 ),
             ]
         );
@@ -586,12 +638,12 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::OutOfMap
                 ),
@@ -610,12 +662,12 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Explored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Explored
                 ),
@@ -634,17 +686,17 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Unexplored
                 ),
@@ -663,12 +715,12 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Frontier
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Frontier
                 ),
@@ -687,12 +739,12 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Assigned
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset)
+                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset, *map.resolution())
                         .unwrap(),
                     &LocationType::Assigned
                 ),
