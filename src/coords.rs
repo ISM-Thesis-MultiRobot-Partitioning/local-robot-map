@@ -446,7 +446,7 @@ mod tests {
             .map(|loc| {
                 loc.into_internal(
                     Coords::new(-1.0, -1.0, -1.0),
-                    AxisResolution::uniform(1.0),
+                    AxisResolution::uniform(2.0),
                 )
                 .unwrap()
             })
@@ -459,8 +459,8 @@ mod tests {
                 .collect::<Vec<&Coords>>(),
             vec![
                 &Coords::new(0.0, 0.0, 0.0),
-                &Coords::new(1.0, 1.0, 1.0),
                 &Coords::new(2.0, 2.0, 2.0),
+                &Coords::new(4.0, 4.0, 4.0),
             ]
         )
     }
@@ -476,19 +476,19 @@ mod tests {
             InternalLocation::new(
                 Coords::new(0.0, 0.0, 0.0),
                 offset,
-                AxisResolution::uniform(1.0),
+                AxisResolution::uniform(2.0),
             )
             .unwrap(),
             InternalLocation::new(
                 Coords::new(1.0, 1.0, 1.0),
                 offset,
-                AxisResolution::uniform(1.0),
+                AxisResolution::uniform(2.0),
             )
             .unwrap(),
             InternalLocation::new(
                 Coords::new(2.0, 2.0, 2.0),
                 offset,
-                AxisResolution::uniform(1.0),
+                AxisResolution::uniform(2.0),
             )
             .unwrap(),
         ];
@@ -505,8 +505,8 @@ mod tests {
                 .collect::<Vec<&Coords>>(),
             vec![
                 &Coords::new(-1.0, -1.0, -1.0),
+                &Coords::new(-0.5, -0.5, -0.5),
                 &Coords::new(0.0, 0.0, 0.0),
-                &Coords::new(1.0, 1.0, 1.0),
             ]
         )
     }
@@ -527,7 +527,7 @@ mod tests {
         .map(|loc| {
             loc.into_internal(
                 Coords::new(-1.0, -1.0, -1.0),
-                AxisResolution::uniform(1.0),
+                AxisResolution::uniform(2.0),
             )
             .unwrap()
         })
@@ -547,9 +547,9 @@ mod tests {
                 .map(|iloc| iloc.location())
                 .collect::<Vec<&Coords>>(),
             vec![
-                &Coords::new(1.0, 1.0, 1.0),
                 &Coords::new(2.0, 2.0, 2.0),
-                &Coords::new(3.0, 3.0, 3.0),
+                &Coords::new(4.0, 4.0, 4.0),
+                &Coords::new(6.0, 6.0, 6.0),
             ]
         )
     }
@@ -565,7 +565,7 @@ mod tests {
         .map(|loc| {
             loc.into_internal(
                 Coords::new(-1.0, -1.0, -1.0),
-                AxisResolution::uniform(1.0),
+                AxisResolution::uniform(2.0),
             )
             .unwrap()
         })
