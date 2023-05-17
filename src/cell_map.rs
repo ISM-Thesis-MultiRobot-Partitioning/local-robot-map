@@ -159,20 +159,22 @@ impl CellMap {
         &self,
         location: &RealWorldLocation,
     ) -> Result<[usize; 2], LocationError> {
-        let coord: InternalLocation =
-            match location.clone().into_internal(self.offset, self.resolution) {
-                Ok(c) => c,
-                Err((location_error, _)) => return Err(location_error),
-            };
+        let coord: InternalLocation = match location
+            .clone()
+            .into_internal(self.offset, self.resolution)
+        {
+            Ok(c) => c,
+            Err((location_error, _)) => return Err(location_error),
+        };
 
-        let col: usize = coord.x()
-            .floor()
-            .to_usize()
-            .expect("An overflow likely occured when converting f64 to usize");
-        let row: usize = coord.y()
-            .floor()
-            .to_usize()
-            .expect("An overflow likely occured when converting f64 to usize");
+        let col: usize =
+            coord.x().floor().to_usize().expect(
+                "An overflow likely occured when converting f64 to usize",
+            );
+        let row: usize =
+            coord.y().floor().to_usize().expect(
+                "An overflow likely occured when converting f64 to usize",
+            );
 
         if col >= self.width() || row >= self.height() {
             return Err(LocationError::OutOfMap);
@@ -563,13 +565,21 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 0.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(1.0, 2.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::OutOfMap
                 ),
             ]
@@ -609,18 +619,30 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 0.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &OTR
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(8.0, 3.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(8.0, 3.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &OTR
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(5.0, 5.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(5.0, 5.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &OTR
                 ),
             ]
@@ -638,13 +660,21 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 0.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 0.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::OutOfMap
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 2.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(1.0, 2.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::OutOfMap
                 ),
             ]
@@ -662,13 +692,21 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 1.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(2.0, 1.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Explored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 4.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(1.0, 4.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Explored
                 ),
             ]
@@ -686,18 +724,30 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 1.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(1.0, 1.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(1.0, 3.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(1.0, 3.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Unexplored
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 4.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 4.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Unexplored
                 ),
             ]
@@ -715,13 +765,21 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 1.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 1.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Frontier
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 4.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(2.0, 4.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Frontier
                 ),
             ]
@@ -739,13 +797,21 @@ pub mod tests {
             cells,
             vec![
                 Cell::new(
-                    InternalLocation::new(Coords::new(0.0, 2.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(0.0, 2.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Assigned
                 ),
                 Cell::new(
-                    InternalLocation::new(Coords::new(2.0, 3.0, 0.0), offset, *map.resolution())
-                        .unwrap(),
+                    InternalLocation::new(
+                        Coords::new(2.0, 3.0, 0.0),
+                        offset,
+                        *map.resolution()
+                    )
+                    .unwrap(),
                     &LocationType::Assigned
                 ),
             ]

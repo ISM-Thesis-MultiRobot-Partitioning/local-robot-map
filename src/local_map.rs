@@ -1,6 +1,6 @@
 use crate::{
-    Algorithm, Location, LocationError, MapState, MaskMapState, Partition,
-    PartitionError, RealWorldLocation, Visualize, AxisResolution,
+    Algorithm, AxisResolution, Location, LocationError, MapState, MaskMapState,
+    Partition, PartitionError, RealWorldLocation, Visualize,
 };
 
 pub struct LocalMap<T>
@@ -63,7 +63,10 @@ where
         #![allow(unused_variables, unused_mut)]
         // dummy use of `change_offset` to remove warning
         my_position
-            .into_internal(crate::Coords::new(0.0, 0.0, 0.0), AxisResolution::uniform(1.0))
+            .into_internal(
+                crate::Coords::new(0.0, 0.0, 0.0),
+                AxisResolution::uniform(1.0),
+            )
             .unwrap()
             .change_offset(crate::Coords::new(0.0, 0.0, 0.0))
             .unwrap();
