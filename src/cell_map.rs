@@ -17,9 +17,7 @@ use image::{ImageBuffer, RgbImage};
 /// # Example
 ///
 /// ```
-/// use local_robot_map::{
-///     AxisResolution, CellMap, Coords, RealWorldLocation,
-/// };
+/// use local_robot_map::{AxisResolution, CellMap, Coords, RealWorldLocation};
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
 /// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
@@ -47,9 +45,7 @@ use image::{ImageBuffer, RgbImage};
 /// setting a higher `resolution` like in the previous example.
 ///
 /// ```
-/// use local_robot_map::{
-///     AxisResolution, CellMap, RealWorldLocation,
-/// };
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation};
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
 /// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
@@ -62,9 +58,7 @@ use image::{ImageBuffer, RgbImage};
 /// ```
 ///
 /// ```
-/// use local_robot_map::{
-///     AxisResolution, CellMap, RealWorldLocation,
-/// };
+/// use local_robot_map::{AxisResolution, CellMap, RealWorldLocation};
 ///
 /// let point1 = RealWorldLocation::from_xyz(-1.0, -2.0, 0.0);
 /// let point2 = RealWorldLocation::from_xyz(0.5, 1.0, 0.0);
