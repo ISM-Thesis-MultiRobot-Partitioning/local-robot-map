@@ -171,12 +171,6 @@ impl CellMap {
                 Err((location_error, _)) => return Err(location_error),
             };
 
-        if coord.x() > (self.width() as f64 * self.resolution().x)
-            || coord.y() > (self.height() as f64 * self.resolution().y)
-        {
-            return Err(LocationError::OutOfMap);
-        };
-
         let col: usize = (coord.x() * self.resolution().x)
             .floor()
             .to_usize()
@@ -185,6 +179,10 @@ impl CellMap {
             .floor()
             .to_usize()
             .expect("An overflow likely occured when converting f64 to usize");
+
+        if col >= self.width() || row >= self.height() {
+            return Err(LocationError::OutOfMap);
+        };
 
         Ok([row, col])
     }
