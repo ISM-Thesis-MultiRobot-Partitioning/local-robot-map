@@ -55,6 +55,49 @@ where
         })
     }
 
+    /// Create a [`LocalMap`] which allows out-of-map robots.
+    ///
+    /// It works the same as [`LocalMap::new_noexpand`], except that it will
+    /// allow robots to be placed such that they would result in a
+    /// [`LocationError::OutOfMap`]
+    ///
+    /// # Errors
+    ///
+    /// Same as [`LocalMap::new_noexpand`] except that
+    /// [`LocationError::OutOfMap`] will not be returned.
+    pub fn new_noexpand_nooutofmap(
+        mut map: T,
+        my_position: RealWorldLocation,
+        other_positions: Vec<RealWorldLocation>,
+    ) -> Result<Self, (LocationError, RealWorldLocation)> {
+        match map.set_location(&my_position, MapState::MyRobot) {
+            Ok(_) => {}
+            Err(e) => match e {
+                LocationError::OutOfMap => {}
+                #[allow(unreachable_patterns)]
+                _ => return Err((e, my_position)),
+            },
+        }
+
+        for pos in &other_positions {
+            match map.set_location(pos, MapState::OtherRobot) {
+                Ok(_) => {}
+                Err(e) => match e {
+                    LocationError::OutOfMap => {},
+                    #[allow(unreachable_patterns)]
+                    _ => return Err((e, my_position)),
+                },
+            }
+        }
+
+        Ok(Self {
+            map,
+            my_position,
+            other_positions,
+            partition_algorithm: None,
+        })
+    }
+
     pub fn new_expand(
         mut map: T,
         my_position: RealWorldLocation,
