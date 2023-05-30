@@ -168,16 +168,7 @@ impl MapState {
     /// This is useful when trying to visualize the map. Can be
     /// used when implementing [`Visualize::as_image`].
     pub fn to_luma(&self) -> image::Luma<u8> {
-        use image::Luma;
-        match self {
-            MapState::OutOfMap => Luma([0]),
-            MapState::OtherRobot => Luma([40]),
-            MapState::MyRobot => Luma([50]),
-            MapState::Explored => Luma([180]),
-            MapState::Unexplored => Luma([120]),
-            MapState::Frontier => Luma([220]),
-            MapState::Assigned => Luma([255]),
-        }
+        self.into()
     }
 
     /// Returns a corresponding [`image::Rgb`] of the [`MapState`].
@@ -185,16 +176,7 @@ impl MapState {
     /// This is useful when trying to visualize the map. Can be
     /// used when implementing [`Visualize::as_image`].
     pub fn to_rgb(&self) -> image::Rgb<u8> {
-        use image::Rgb;
-        match self {
-            MapState::OutOfMap => Rgb([0, 0, 0]),
-            MapState::OtherRobot => Rgb([50, 255, 50]),
-            MapState::MyRobot => Rgb([255, 50, 50]),
-            MapState::Explored => Rgb([200, 200, 200]),
-            MapState::Unexplored => Rgb([100, 100, 100]),
-            MapState::Frontier => Rgb([50, 50, 100]),
-            MapState::Assigned => Rgb([255, 255, 0]),
-        }
+        self.into()
     }
 }
 
@@ -208,6 +190,36 @@ impl From<&MapState> for &str {
             MapState::Unexplored => "Unexplored",
             MapState::Frontier => "Frontier",
             MapState::Assigned => "Assigned",
+        }
+    }
+}
+
+impl From<&MapState> for image::Luma<u8> {
+    fn from(value: &MapState) -> Self {
+        use image::Luma;
+        match value {
+            MapState::OutOfMap => Luma([0]),
+            MapState::OtherRobot => Luma([40]),
+            MapState::MyRobot => Luma([50]),
+            MapState::Explored => Luma([180]),
+            MapState::Unexplored => Luma([120]),
+            MapState::Frontier => Luma([220]),
+            MapState::Assigned => Luma([255]),
+        }
+    }
+}
+
+impl From<&MapState> for image::Rgb<u8> {
+    fn from(value: &MapState) -> Self {
+        use image::Rgb;
+        match value {
+            MapState::OutOfMap => Rgb([0, 0, 0]),
+            MapState::OtherRobot => Rgb([50, 255, 50]),
+            MapState::MyRobot => Rgb([255, 50, 50]),
+            MapState::Explored => Rgb([200, 200, 200]),
+            MapState::Unexplored => Rgb([100, 100, 100]),
+            MapState::Frontier => Rgb([50, 50, 100]),
+            MapState::Assigned => Rgb([255, 255, 0]),
         }
     }
 }
