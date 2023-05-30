@@ -218,7 +218,7 @@ impl From<&MapState> for image::Rgb<u8> {
             MapState::MyRobot => Rgb([255, 50, 50]),
             MapState::Explored => Rgb([200, 200, 200]),
             MapState::Unexplored => Rgb([100, 100, 100]),
-            MapState::Frontier => Rgb([50, 50, 100]),
+            MapState::Frontier => Rgb([255, 100, 255]),
             MapState::Assigned => Rgb([255, 255, 0]),
         }
     }
