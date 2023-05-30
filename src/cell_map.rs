@@ -287,6 +287,46 @@ impl<'a> Cell<'a> {
         }
     }
 
+    /// A rudimentary function for creating a [`Cell`].
+    ///
+    /// This function's primary intention is to provide a way to create a
+    /// [`Cell`] using a matrix coordinate. This will primarily be useful when
+    /// converting the map to another external matrix-like type, but you want to
+    /// avoid a full conversion back to a [`CellMap`] because you only need
+    /// to work with a subset of the cells.
+    ///
+    /// # Assumption
+    ///
+    /// This crate exposes the [`RealWorldLocation`] type, but has a
+    /// corresponding twin type for internal use. This second type is not
+    /// publicly exposed but allows to transparently work with matrix
+    /// coordinates given real-world coordinates.
+    ///
+    /// That said, this function assumes that you pass in a matrix coordinate as
+    /// well as the corresponding `offset` and `resolution`. This will allow to
+    /// internall convert the coordinates to a [`RealWorldLocation`].
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if a [`LocationError`] occurs when
+    /// creating the given `location`.
+    pub fn from_internal(
+        location: Coords,
+        offset: Coords,
+        resolution: AxisResolution,
+        value: &'a LocationType,
+    ) -> Result<Self, (LocationError, Coords)> {
+        Ok(Self::new(
+            match InternalLocation::new(location, offset, resolution) {
+                Ok(iloc) => iloc,
+                Err((e, c)) => {
+                    return Err((e, Coords::new(c.x(), c.y(), c.z())))
+                }
+            },
+            value,
+        ))
+    }
+
     pub fn location(&self) -> &RealWorldLocation {
         &self.location
     }
