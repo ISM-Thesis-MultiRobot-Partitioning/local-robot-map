@@ -20,7 +20,7 @@ where
     /// Create a [`LocalMap`] which does not allow out-of-map robots.
     ///
     /// If a robot happens to be placed outside the map area, it will be
-    /// considered [`LocationError::OutOfMap`]. See also [`LoalMap::new_expand`]
+    /// considered [`LocationError::OutOfMap`]. See also [`LocalMap::new_expand`]
     /// which can deal with out-of-map robots.
     ///
     /// # Errors
