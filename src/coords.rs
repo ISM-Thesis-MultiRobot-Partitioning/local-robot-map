@@ -425,6 +425,12 @@ impl AxisResolution {
     }
 }
 
+impl Default for AxisResolution {
+    fn default() -> Self {
+        AxisResolution::new(1.0, 1.0, 1.0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
