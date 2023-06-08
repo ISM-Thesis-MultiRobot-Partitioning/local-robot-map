@@ -27,7 +27,7 @@ pub use coords::Coords;
 
 pub use coords::RealWorldLocation;
 use ndarray::Array2;
-pub use polygon_map::PolygonMap;
+pub use polygon_map::{PolygonMap, PolygonMapError};
 
 pub use local_map::LocalMap;
 

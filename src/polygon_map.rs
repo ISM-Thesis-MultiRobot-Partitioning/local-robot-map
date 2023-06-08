@@ -18,7 +18,7 @@ use crate::{LocationType, MapStateMatrix, RealWorldLocation};
 /// let p1 = RealWorldLocation::from_xyz(0.0, 0.0, 0.0);
 /// let p2 = RealWorldLocation::from_xyz(1.0, 1.0, 0.0);
 /// let p3 = RealWorldLocation::from_xyz(2.0, 0.0, 0.0);
-/// let polygon = PolygonMap::new(vec![p1, p2, p3]);
+/// let polygon = PolygonMap::new(vec![p1, p2, p3]).unwrap();
 ///
 /// assert_eq!(
 ///     polygon.vertices(),
@@ -34,8 +34,14 @@ pub struct PolygonMap {
 }
 
 impl PolygonMap {
-    pub fn new(vertices: Vec<RealWorldLocation>) -> Self {
-        Self { vertices }
+    pub fn new(
+        vertices: Vec<RealWorldLocation>,
+    ) -> Result<Self, PolygonMapError> {
+        if vertices.len() < 3 {
+            Err(PolygonMapError::NotEnoughVertices)
+        } else {
+            Ok(Self { vertices })
+        }
     }
 
     /// Convert this map to a [`CellMap`].
@@ -126,6 +132,13 @@ impl PolygonMap {
     }
 }
 
+#[derive(Debug, PartialEq)]
+pub enum PolygonMapError {
+    /// At least 3 vertices are needed to form a proper polygon on which
+    /// anything meaningful can be done.
+    NotEnoughVertices,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -146,7 +159,7 @@ mod tests {
 
         let resolution = AxisResolution::uniform(1.0);
         let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);
@@ -174,7 +187,7 @@ mod tests {
 
         let resolution = AxisResolution::uniform(2.0);
         let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);
@@ -202,7 +215,7 @@ mod tests {
 
         let resolution = AxisResolution::uniform(2.0);
         let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).to_cell_map(resolution);
+            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);
