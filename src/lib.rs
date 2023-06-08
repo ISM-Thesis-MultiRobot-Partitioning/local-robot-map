@@ -112,6 +112,9 @@ pub trait Partition {
 pub enum PartitionError {
     /// No algorithm was provided for partitioning.
     NoPartitioningAlgorithm,
+    /// No (suitable) map was provided for partitioning.
+    /// See also [`PolygonMapError::NotEnoughVertices`]
+    NoMap,
 }
 
 /// Retrieve a subarea of the map based on a condition.
