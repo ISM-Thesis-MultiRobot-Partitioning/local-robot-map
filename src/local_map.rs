@@ -104,16 +104,8 @@ where
         other_positions: Vec<RealWorldLocation>,
     ) -> Self {
         #![allow(unused_variables, unused_mut)]
-        // dummy use of `change_offset` to remove warning
-        my_position
-            .into_internal(
-                crate::Coords::new(0.0, 0.0, 0.0),
-                AxisResolution::uniform(1.0),
-            )
-            .unwrap()
-            .change_offset(crate::Coords::new(0.0, 0.0, 0.0))
-            .unwrap();
-        todo!("")
+        // See also [`crate::coords::InternalLocation::change_offset`].
+        todo!()
     }
 
     pub fn map(&self) -> &T {

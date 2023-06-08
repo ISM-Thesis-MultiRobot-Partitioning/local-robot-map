@@ -296,6 +296,7 @@ impl InternalLocation {
     /// provide to [`RealWorldLocation::into_internal`]). The implementation
     /// should take care of calculating the relative offset, and thus alleviate
     /// the programmer.
+    #[allow(dead_code)]
     pub(crate) fn change_offset(
         self,
         offset: Coords,
