@@ -110,6 +110,7 @@ pub trait Partition {
 
 #[derive(Debug, PartialEq)]
 pub enum PartitionError {
+    /// No algorithm was provided for partitioning.
     NoPartitioningAlgorithm,
 }
 
