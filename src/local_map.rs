@@ -1,5 +1,5 @@
 use crate::{
-    Algorithm, AxisResolution, Location, LocationError, MapState, MaskMapState,
+    Algorithm, Location, LocationError, MapState, MaskMapState,
     Partition, PartitionError, RealWorldLocation, Visualize,
 };
 
