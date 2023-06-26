@@ -33,7 +33,18 @@ pub use local_map::LocalMap;
 
 pub type LocationType = MapState;
 pub type MapStateMatrix = Array2<LocationType>;
-pub(crate) type Algorithm<T> = fn(T) -> T;
+/// The function signature which the partitioning algorithm should have.
+///
+/// `T` is the type of the map to be partitioned. The function is intended to
+/// consume the map and then return a "new" one.
+///
+/// `F` is a type which captures partitioning factors. They can be used to
+/// influence how the partitions are made, for example a robot's speed could be
+/// such a factor and used for weighting other metrics.
+///
+/// Note that `F` is given as an [`Option`], allowing to not pass any additional
+/// factors beyond what is already encoded in the map `T`.
+pub(crate) type Algorithm<T, F> = fn(T, Option<F>) -> T;
 
 /// Visualize a map.
 pub trait Visualize {
@@ -88,9 +99,9 @@ pub trait Visualize {
 /// The overarching idea was to allow multiple partitioning schemes to be
 /// implemented, which can be done by creating multiple crates/modules which
 /// each implement the partitioning in any way they see fit.
-pub trait Partition {
+pub trait Partition<F> {
     /// Consumes the map and returns the partitioned version thereof.
-    fn partition(mut self) -> Result<Self, PartitionError>
+    fn partition(mut self, factors: Option<F>) -> Result<Self, PartitionError>
     where
         Self: Sized,
     {
@@ -98,14 +109,14 @@ pub trait Partition {
             .get_partition_algorithm()?
             .take()
             .expect("Partitioning algorithm was provided");
-        let mut map: Self = partition_algorithm(self);
+        let mut map: Self = partition_algorithm(self, factors);
         map.set_partition_algorithm(partition_algorithm);
         Ok(map)
     }
-    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self>);
+    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self, F>);
     fn get_partition_algorithm(
         &mut self,
-    ) -> Result<&mut Option<Algorithm<Self>>, PartitionError>;
+    ) -> Result<&mut Option<Algorithm<Self, F>>, PartitionError>;
 }
 
 #[derive(Debug, PartialEq)]

@@ -3,17 +3,30 @@ use crate::{
     PartitionError, RealWorldLocation, Visualize,
 };
 
-pub struct LocalMap<T>
+/// Type for map stored locally on a robot.
+///
+/// # Generic Types
+///
+/// - `T` describes the type of the map that is used for partitioning. It is
+///   restricted under certain traits which allows for a more uniform and
+///   standardized implementation.
+/// - `F` is a type containing additional partitioning factors. They are passed
+///   as arguments to the `partition_algorithm` function.
+///
+/// Note that if you are not interested in additional partitioning factors, you
+/// can set `F` to be the empty type `()`. And then simply perform the
+/// partitioning by passing [`None`] as the partitioning factors.
+pub struct LocalMap<T, F>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
     map: T,
     my_position: RealWorldLocation,
     other_positions: Vec<RealWorldLocation>,
-    partition_algorithm: Option<Algorithm<Self>>,
+    partition_algorithm: Option<Algorithm<Self, F>>,
 }
 
-impl<T> LocalMap<T>
+impl<T, F> LocalMap<T, F>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
@@ -122,17 +135,17 @@ where
     }
 }
 
-impl<T> Partition for LocalMap<T>
+impl<T, F> Partition<F> for LocalMap<T, F>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
-    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self>) {
+    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self, F>) {
         self.partition_algorithm = Some(algorithm);
     }
 
     fn get_partition_algorithm(
         &mut self,
-    ) -> Result<&mut Option<Algorithm<Self>>, PartitionError> {
+    ) -> Result<&mut Option<Algorithm<Self, F>>, PartitionError> {
         match self.partition_algorithm {
             Some(_) => Ok(&mut self.partition_algorithm),
             None => Err(PartitionError::NoPartitioningAlgorithm),
@@ -140,7 +153,7 @@ where
     }
 }
 
-impl<T> Visualize for LocalMap<T>
+impl<T, F> Visualize for LocalMap<T, F>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
@@ -151,7 +164,7 @@ where
     }
 }
 
-impl<T> std::fmt::Debug for LocalMap<T>
+impl<T, F> std::fmt::Debug for LocalMap<T, F>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
@@ -177,7 +190,7 @@ mod tests {
     fn make_random_local_map(
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
-    ) -> LocalMap<CellMap> {
+    ) -> LocalMap<CellMap, ()> {
         let (map, _) = make_map();
 
         LocalMap::new_noexpand(map, my_position, other_positions).unwrap()
@@ -186,7 +199,7 @@ mod tests {
     fn make_local_map(
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
-    ) -> LocalMap<CellMap> {
+    ) -> LocalMap<CellMap, ()> {
         LocalMap::new_noexpand(
             CellMap::new(
                 RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
@@ -212,7 +225,7 @@ mod tests {
     #[test]
     fn new_noexpand_robots_in_map() {
         const OFFSET: f64 = 5.0;
-        let lmap = {
+        let lmap: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -284,7 +297,7 @@ mod tests {
                     4.0 - OFFSET,
                 ),
             ];
-            LocalMap::new_noexpand(
+            LocalMap::<CellMap, ()>::new_noexpand(
                 CellMap::new(
                     RealWorldLocation::from_xyz(
                         0.0 - OFFSET,
@@ -342,7 +355,7 @@ mod tests {
                     4.0 - OFFSET,
                 ),
             ];
-            LocalMap::new_noexpand(
+            LocalMap::<CellMap, ()>::new_noexpand(
                 CellMap::new(
                     RealWorldLocation::from_xyz(
                         0.0 - OFFSET,
@@ -400,7 +413,7 @@ mod tests {
                     -4.0 - OFFSET,
                 ),
             ];
-            LocalMap::new_noexpand(
+            LocalMap::<CellMap, ()>::new_noexpand(
                 CellMap::new(
                     RealWorldLocation::from_xyz(
                         0.0 - OFFSET,
@@ -435,7 +448,7 @@ mod tests {
     #[test]
     fn new_expand_robots_in_map() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -483,7 +496,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 16.84 - OFFSET,
                 1.0 - OFFSET,
@@ -531,7 +544,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right_up() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -579,7 +592,7 @@ mod tests {
     #[test]
     fn new_expand_robot_up() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -627,7 +640,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left_up() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -675,7 +688,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 -4.0 - OFFSET,
                 1.0 - OFFSET,
@@ -723,7 +736,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left_down() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -771,7 +784,7 @@ mod tests {
     #[test]
     fn new_expand_robot_down() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 -3.0 - OFFSET,
@@ -819,7 +832,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right_down() {
         const OFFSET: f64 = 5.0;
-        let map = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -932,9 +945,10 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        lmap.set_partition_algorithm(|map| map);
+        lmap.set_partition_algorithm(|map, _| map);
 
-        let _partitioned_map = lmap.partition().expect("No error partitioning");
+        let _partitioned_map =
+            lmap.partition(None).expect("No error partitioning");
     }
 
     #[test]
@@ -945,12 +959,16 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        fn algorithm(map: LocalMap<CellMap>) -> LocalMap<CellMap> {
+        fn algorithm(
+            map: LocalMap<CellMap, ()>,
+            _: Option<()>,
+        ) -> LocalMap<CellMap, ()> {
             map
         }
         lmap.set_partition_algorithm(algorithm);
 
-        let _partitioned_map = lmap.partition().expect("No error partitioning");
+        let _partitioned_map =
+            lmap.partition(None).expect("No error partitioning");
     }
 
     #[test]
@@ -961,13 +979,16 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        fn algorithm(map: LocalMap<CellMap>) -> LocalMap<CellMap> {
+        fn algorithm(
+            map: LocalMap<CellMap, ()>,
+            _: Option<()>,
+        ) -> LocalMap<CellMap, ()> {
             map
         }
         lmap.set_partition_algorithm(algorithm);
 
         let mut partitioned_map =
-            lmap.partition().expect("No error partitioning");
+            lmap.partition(None).expect("No error partitioning");
         let map_algorithm =
             partitioned_map.get_partition_algorithm().unwrap().unwrap();
         // function pointer equality: https://stackoverflow.com/a/57834304
@@ -981,7 +1002,7 @@ mod tests {
             vec![],
         );
 
-        let partitioned_map = lmap.partition().unwrap_err();
+        let partitioned_map = lmap.partition(None).unwrap_err();
         assert_eq!(partitioned_map, PartitionError::NoPartitioningAlgorithm);
     }
 
