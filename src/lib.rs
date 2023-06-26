@@ -44,7 +44,7 @@ pub type MapStateMatrix = Array2<LocationType>;
 ///
 /// Note that `F` is given as an [`Option`], allowing to not pass any additional
 /// factors beyond what is already encoded in the map `T`.
-pub(crate) type Algorithm<T, F> = fn(T, Option<F>) -> T;
+pub type Algorithm<T, F> = fn(T, Option<F>) -> T;
 
 /// Visualize a map.
 pub trait Visualize {
