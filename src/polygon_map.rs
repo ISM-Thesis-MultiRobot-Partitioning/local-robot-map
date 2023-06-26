@@ -158,8 +158,9 @@ mod tests {
         let p3 = RealWorldLocation::from_xyz(8.0, 0.0, 0.0);
 
         let resolution = AxisResolution::uniform(1.0);
-        let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
+        let cellmap: CellMap = PolygonMap::new(vec![p1, p2, p3])
+            .unwrap()
+            .to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);
@@ -186,8 +187,9 @@ mod tests {
         let p3 = RealWorldLocation::from_xyz(-4.0, -2.0, 0.0);
 
         let resolution = AxisResolution::uniform(2.0);
-        let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
+        let cellmap: CellMap = PolygonMap::new(vec![p1, p2, p3])
+            .unwrap()
+            .to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);
@@ -214,8 +216,9 @@ mod tests {
         let p3 = RealWorldLocation::from_xyz(2.0, 0.0, 0.0);
 
         let resolution = AxisResolution::uniform(2.0);
-        let cellmap: CellMap =
-            PolygonMap::new(vec![p1, p2, p3]).unwrap().to_cell_map(resolution);
+        let cellmap: CellMap = PolygonMap::new(vec![p1, p2, p3])
+            .unwrap()
+            .to_cell_map(resolution);
 
         assert_eq!(cellmap.width(), 8);
         assert_eq!(cellmap.height(), 4);

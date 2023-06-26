@@ -1,6 +1,6 @@
 use crate::{
-    Algorithm, Location, LocationError, MapState, MaskMapState,
-    Partition, PartitionError, RealWorldLocation, Visualize,
+    Algorithm, Location, LocationError, MapState, MaskMapState, Partition,
+    PartitionError, RealWorldLocation, Visualize,
 };
 
 pub struct LocalMap<T>
@@ -20,8 +20,8 @@ where
     /// Create a [`LocalMap`] which does not allow out-of-map robots.
     ///
     /// If a robot happens to be placed outside the map area, it will be
-    /// considered [`LocationError::OutOfMap`]. See also [`LocalMap::new_expand`]
-    /// which can deal with out-of-map robots.
+    /// considered [`LocationError::OutOfMap`]. See also
+    /// [`LocalMap::new_expand`] which can deal with out-of-map robots.
     ///
     /// # Errors
     ///
@@ -83,7 +83,7 @@ where
             match map.set_location(pos, MapState::OtherRobot) {
                 Ok(_) => {}
                 Err(e) => match e {
-                    LocationError::OutOfMap => {},
+                    LocationError::OutOfMap => {}
                     #[allow(unreachable_patterns)]
                     _ => return Err((e, my_position)),
                 },
