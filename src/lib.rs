@@ -101,28 +101,20 @@ pub trait Visualize {
 /// each implement the partitioning in any way they see fit.
 pub trait Partition<F> {
     /// Consumes the map and returns the partitioned version thereof.
-    fn partition(mut self, factors: Option<F>) -> Result<Self, PartitionError>
+    fn partition(
+        self,
+        partition_algorithm: Algorithm<Self, F>,
+        factors: Option<F>,
+    ) -> Result<Self, PartitionError>
     where
         Self: Sized,
     {
-        let partition_algorithm = self
-            .get_partition_algorithm()?
-            .take()
-            .expect("Partitioning algorithm was provided");
-        let mut map: Self = partition_algorithm(self, factors);
-        map.set_partition_algorithm(partition_algorithm);
-        Ok(map)
+        Ok(partition_algorithm(self, factors))
     }
-    fn set_partition_algorithm(&mut self, algorithm: Algorithm<Self, F>);
-    fn get_partition_algorithm(
-        &mut self,
-    ) -> Result<&mut Option<Algorithm<Self, F>>, PartitionError>;
 }
 
 #[derive(Debug, PartialEq)]
 pub enum PartitionError {
-    /// No algorithm was provided for partitioning.
-    NoPartitioningAlgorithm,
     /// No (suitable) map was provided for partitioning.
     /// See also [`PolygonMapError::NotEnoughVertices`]
     NoMap,
