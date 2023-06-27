@@ -170,7 +170,7 @@ where
     }
 }
 
-impl<T, P, F> Partition<F> for LocalMap<T, P> where
+impl<T, P> Partition for LocalMap<T, P> where
     T: Location + MaskMapState + Visualize + std::fmt::Debug
 {
 }
@@ -987,9 +987,8 @@ mod tests {
             vec![],
         );
 
-        let _partitioned_map = lmap
-            .partition(|map, _: Option<()>| map, None)
-            .expect("No error partitioning");
+        let _partitioned_map =
+            lmap.partition(|map| map).expect("No error partitioning");
     }
 
     #[test]
@@ -1000,15 +999,11 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        fn algorithm(
-            map: LocalMap<CellMap, ()>,
-            _: Option<()>,
-        ) -> LocalMap<CellMap, ()> {
+        fn algorithm(map: LocalMap<CellMap, ()>) -> LocalMap<CellMap, ()> {
             map
         }
-        let _partitioned_map = lmap
-            .partition(algorithm, None)
-            .expect("No error partitioning");
+        let _partitioned_map =
+            lmap.partition(algorithm).expect("No error partitioning");
     }
 
     #[test]
@@ -1021,13 +1016,12 @@ mod tests {
         // set dummy algorithm for the test
         fn algorithm(
             map: LocalMap<CellMap, ()>,
-            _: Option<()>,
         ) -> LocalMap<CellMap, ()> {
             map
         }
 
         let _partitioned_map = lmap
-            .partition(algorithm, None)
+            .partition(algorithm)
             .expect("No error partitioning");
         let map_algorithm = algorithm;
         // function pointer equality: https://stackoverflow.com/a/57834304

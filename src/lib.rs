@@ -44,7 +44,7 @@ pub type MapStateMatrix = Array2<LocationType>;
 ///
 /// Note that `F` is given as an [`Option`], allowing to not pass any additional
 /// factors beyond what is already encoded in the map `T`.
-pub type Algorithm<T, F> = fn(T, Option<F>) -> T;
+pub type Algorithm<T> = fn(T) -> T;
 
 /// Visualize a map.
 pub trait Visualize {
@@ -99,17 +99,16 @@ pub trait Visualize {
 /// The overarching idea was to allow multiple partitioning schemes to be
 /// implemented, which can be done by creating multiple crates/modules which
 /// each implement the partitioning in any way they see fit.
-pub trait Partition<F> {
+pub trait Partition {
     /// Consumes the map and returns the partitioned version thereof.
     fn partition(
         self,
-        partition_algorithm: Algorithm<Self, F>,
-        factors: Option<F>,
+        partition_algorithm: Algorithm<Self>,
     ) -> Result<Self, PartitionError>
     where
         Self: Sized,
     {
-        Ok(partition_algorithm(self, factors))
+        Ok(partition_algorithm(self))
     }
 }
 
