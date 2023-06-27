@@ -3,6 +3,35 @@ use crate::{
     RealWorldLocation, Visualize,
 };
 
+/// Wrapper type to store robot's location **and** related parameters.
+///
+/// The parameters are intended to store additional information about a robot.
+/// They are given as a generic type `P` in order to give full control and
+/// flexibility to users of the crate.
+///
+/// One use case for the parameters could be to add identifiers to the robots,
+/// or to include factors that shall influence the partitioning.
+#[derive(Debug)]
+pub struct Robot<P> {
+    location: RealWorldLocation,
+    parameters: P,
+}
+
+impl<P> Robot<P> {
+    pub fn new(location: RealWorldLocation, parameters: P) -> Self {
+        Self {
+            location,
+            parameters,
+        }
+    }
+    pub fn location(&self) -> &RealWorldLocation {
+        &self.location
+    }
+    pub fn parameters(&self) -> &P {
+        &self.parameters
+    }
+}
+
 /// Type for map stored locally on a robot.
 ///
 /// # Generic Types
@@ -16,16 +45,16 @@ use crate::{
 /// Note that if you are not interested in additional partitioning factors, you
 /// can set `F` to be the empty type `()`. And then simply perform the
 /// partitioning by passing [`None`] as the partitioning factors.
-pub struct LocalMap<T>
+pub struct LocalMap<T, P>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
     map: T,
-    my_position: RealWorldLocation,
-    other_positions: Vec<RealWorldLocation>,
+    my_robot: Robot<P>,
+    other_robots: Vec<Robot<P>>,
 }
 
-impl<T> LocalMap<T>
+impl<T, P> LocalMap<T, P>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
@@ -42,27 +71,27 @@ where
     /// coordinate of the offending robot.
     pub fn new_noexpand(
         mut map: T,
-        my_position: RealWorldLocation,
-        other_positions: Vec<RealWorldLocation>,
+        my_robot: Robot<P>,
+        other_robots: Vec<Robot<P>>,
     ) -> Result<Self, (LocationError, RealWorldLocation)> {
         if let Err(location_error) =
-            map.set_location(&my_position, MapState::MyRobot)
+            map.set_location(my_robot.location(), MapState::MyRobot)
         {
-            return Err((location_error, my_position));
+            return Err((location_error, my_robot.location));
         };
 
-        for pos in &other_positions {
+        for pos in &other_robots {
             if let Err(location_error) =
-                map.set_location(pos, MapState::OtherRobot)
+                map.set_location(pos.location(), MapState::OtherRobot)
             {
-                return Err((location_error, pos.clone()));
+                return Err((location_error, pos.location().clone()));
             }
         }
 
         Ok(Self {
             map,
-            my_position,
-            other_positions,
+            my_robot,
+            other_robots,
         })
     }
 
@@ -78,33 +107,33 @@ where
     /// [`LocationError::OutOfMap`] will not be returned.
     pub fn new_noexpand_nooutofmap(
         mut map: T,
-        my_position: RealWorldLocation,
-        other_positions: Vec<RealWorldLocation>,
+        my_robot: Robot<P>,
+        other_robots: Vec<Robot<P>>,
     ) -> Result<Self, (LocationError, RealWorldLocation)> {
-        match map.set_location(&my_position, MapState::MyRobot) {
+        match map.set_location(my_robot.location(), MapState::MyRobot) {
             Ok(_) => {}
             Err(e) => match e {
                 LocationError::OutOfMap => {}
                 #[allow(unreachable_patterns)]
-                _ => return Err((e, my_position)),
+                _ => return Err((e, my_robot.location().clone())),
             },
         }
 
-        for pos in &other_positions {
-            match map.set_location(pos, MapState::OtherRobot) {
+        for pos in &other_robots {
+            match map.set_location(pos.location(), MapState::OtherRobot) {
                 Ok(_) => {}
                 Err(e) => match e {
                     LocationError::OutOfMap => {}
                     #[allow(unreachable_patterns)]
-                    _ => return Err((e, my_position)),
+                    _ => return Err((e, my_robot.location().clone())),
                 },
             }
         }
 
         Ok(Self {
             map,
-            my_position,
-            other_positions,
+            my_robot,
+            other_robots,
         })
     }
 
@@ -125,19 +154,28 @@ where
         &mut self.map
     }
     pub fn my_position(&self) -> &RealWorldLocation {
-        &self.my_position
+        &self.my_robot.location
     }
-    pub fn other_positions(&self) -> &Vec<RealWorldLocation> {
-        &self.other_positions
+    pub fn other_positions(&self) -> Vec<RealWorldLocation> {
+        self.other_robots
+            .iter()
+            .map(|r| r.location().clone())
+            .collect()
+    }
+    pub fn my_robot(&self) -> &Robot<P> {
+        &self.my_robot
+    }
+    pub fn other_robots(&self) -> &Vec<Robot<P>> {
+        &self.other_robots
     }
 }
 
-impl<T, F> Partition<F> for LocalMap<T> where
+impl<T, P, F> Partition<F> for LocalMap<T, P> where
     T: Location + MaskMapState + Visualize + std::fmt::Debug
 {
 }
 
-impl<T> Visualize for LocalMap<T>
+impl<T, P> Visualize for LocalMap<T, P>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
 {
@@ -148,15 +186,16 @@ where
     }
 }
 
-impl<T> std::fmt::Debug for LocalMap<T>
+impl<T, P> std::fmt::Debug for LocalMap<T, P>
 where
     T: Location + MaskMapState + Visualize + std::fmt::Debug,
+    P: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "LocalMap: map = {:?}, my_position = {:?}, other_positions = {:?}",
-            self.map, self.my_position, self.other_positions,
+            "LocalMap: map = {:?}, my_robot = {:?}, other_robots = {:?}",
+            self.map, self.my_robot, self.other_robots,
         )
     }
 }
@@ -171,24 +210,35 @@ mod tests {
     fn make_random_local_map(
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
-    ) -> LocalMap<CellMap> {
+    ) -> LocalMap<CellMap, ()> {
         let (map, _) = make_map();
 
-        LocalMap::new_noexpand(map, my_position, other_positions).unwrap()
+        LocalMap::new_noexpand(
+            map,
+            Robot::new(my_position, ()),
+            other_positions
+                .into_iter()
+                .map(|loc| Robot::new(loc, ()))
+                .collect(),
+        )
+        .unwrap()
     }
 
     fn make_local_map(
         my_position: RealWorldLocation,
         other_positions: Vec<RealWorldLocation>,
-    ) -> LocalMap<CellMap> {
+    ) -> LocalMap<CellMap, ()> {
         LocalMap::new_noexpand(
             CellMap::new(
                 RealWorldLocation::from_xyz(0.0, 0.0, 0.0),
                 RealWorldLocation::from_xyz(10.0, 10.0, 10.0),
                 crate::AxisResolution::uniform(1.0),
             ),
-            my_position,
-            other_positions,
+            Robot::new(my_position, ()),
+            other_positions
+                .into_iter()
+                .map(|loc| Robot::new(loc, ()))
+                .collect(),
         )
         .unwrap()
     }
@@ -206,7 +256,7 @@ mod tests {
     #[test]
     fn new_noexpand_robots_in_map() {
         const OFFSET: f64 = 5.0;
-        let lmap: LocalMap<CellMap> = {
+        let lmap: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -243,8 +293,11 @@ mod tests {
                     ),
                     crate::AxisResolution::uniform(1.0),
                 ),
-                my_position,
-                other_positions,
+                Robot::new(my_position, ()),
+                other_positions
+                    .into_iter()
+                    .map(|loc| Robot::new(loc, ()))
+                    .collect(),
             )
         }
         .expect("No location error");
@@ -292,8 +345,11 @@ mod tests {
                     ),
                     crate::AxisResolution::uniform(1.0),
                 ),
-                my_position,
-                other_positions,
+                Robot::new(my_position, ()),
+                other_positions
+                    .into_iter()
+                    .map(|loc| Robot::new(loc, ()))
+                    .collect(),
             )
         };
 
@@ -350,8 +406,11 @@ mod tests {
                     ),
                     crate::AxisResolution::uniform(1.0),
                 ),
-                my_position,
-                other_positions,
+                Robot::new(my_position, ()),
+                other_positions
+                    .into_iter()
+                    .map(|loc| Robot::new(loc, ()))
+                    .collect(),
             )
         };
 
@@ -408,8 +467,11 @@ mod tests {
                     ),
                     crate::AxisResolution::uniform(1.0),
                 ),
-                my_position,
-                other_positions,
+                Robot::new(my_position, ()),
+                other_positions
+                    .into_iter()
+                    .map(|loc| Robot::new(loc, ()))
+                    .collect(),
             )
         };
 
@@ -429,7 +491,7 @@ mod tests {
     #[test]
     fn new_expand_robots_in_map() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -477,7 +539,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 16.84 - OFFSET,
                 1.0 - OFFSET,
@@ -525,7 +587,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right_up() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -573,7 +635,7 @@ mod tests {
     #[test]
     fn new_expand_robot_up() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -621,7 +683,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left_up() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -669,7 +731,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 -4.0 - OFFSET,
                 1.0 - OFFSET,
@@ -717,7 +779,7 @@ mod tests {
     #[test]
     fn new_expand_robot_left_down() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -765,7 +827,7 @@ mod tests {
     #[test]
     fn new_expand_robot_down() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 -3.0 - OFFSET,
@@ -813,7 +875,7 @@ mod tests {
     #[test]
     fn new_expand_robot_right_down() {
         const OFFSET: f64 = 5.0;
-        let map: LocalMap<CellMap> = {
+        let map: LocalMap<CellMap, ()> = {
             let my_position = RealWorldLocation::from_xyz(
                 1.0 - OFFSET,
                 1.0 - OFFSET,
@@ -885,7 +947,7 @@ mod tests {
             get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 0, "There should only be no other robots");
-        assert_eq!(lmap.other_positions(), &positions);
+        assert_eq!(lmap.other_positions(), positions);
     }
 
     #[test]
@@ -898,7 +960,7 @@ mod tests {
             get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 1, "There should only be 1 other robots");
-        assert_eq!(lmap.other_positions(), &positions);
+        assert_eq!(lmap.other_positions(), positions);
     }
 
     #[test]
@@ -915,7 +977,7 @@ mod tests {
             get_mapstate_pos_from_map(lmap.map(), LocationType::OtherRobot);
 
         assert_eq!(positions.len(), 3, "There should only be 3 other robots");
-        assert_eq!(lmap.other_positions(), &positions);
+        assert_eq!(lmap.other_positions(), positions);
     }
 
     #[test]
@@ -939,9 +1001,9 @@ mod tests {
 
         // set dummy algorithm for the test
         fn algorithm(
-            map: LocalMap<CellMap>,
+            map: LocalMap<CellMap, ()>,
             _: Option<()>,
-        ) -> LocalMap<CellMap> {
+        ) -> LocalMap<CellMap, ()> {
             map
         }
         let _partitioned_map = lmap
@@ -958,9 +1020,9 @@ mod tests {
 
         // set dummy algorithm for the test
         fn algorithm(
-            map: LocalMap<CellMap>,
+            map: LocalMap<CellMap, ()>,
             _: Option<()>,
-        ) -> LocalMap<CellMap> {
+        ) -> LocalMap<CellMap, ()> {
             map
         }
 

@@ -29,7 +29,7 @@ pub use coords::RealWorldLocation;
 use ndarray::Array2;
 pub use polygon_map::{PolygonMap, PolygonMapError};
 
-pub use local_map::LocalMap;
+pub use local_map::{LocalMap, Robot};
 
 pub type LocationType = MapState;
 pub type MapStateMatrix = Array2<LocationType>;
