@@ -110,7 +110,18 @@ impl PolygonMap {
     /// The `resolution` is used to impact the size/dimension of the
     /// [`CellMap`]. See also [`AxisResolution`].
     pub fn to_cell_map(self, resolution: AxisResolution) -> CellMap {
-        let (cells, offset) = self.rasterize_polygon(&resolution);
+        let (cells, offset) =
+            self.rasterize_polygon(&self.vertices, &resolution);
+        let cells = cells.map(|e| match e {
+            true => LocationType::Unexplored,
+            false => LocationType::OutOfMap,
+        });
+
+        // Set already-explored `cells`
+        if let Some(explored) = self.explored {
+            todo!()
+        }
+
         CellMap::from_raster(cells, resolution, offset)
     }
 
@@ -135,14 +146,12 @@ impl PolygonMap {
     ///   infinite values.
     fn rasterize_polygon(
         &self,
+        vertices: &[RealWorldLocation],
         resolution: &AxisResolution,
-    ) -> (MapStateMatrix, Coords) {
+    ) -> (ndarray::Array2<bool>, Coords) {
         let polygon = geo::Polygon::new(
             geo::LineString::from(
-                self.vertices
-                    .iter()
-                    .map(|e| (e.x(), e.y()))
-                    .collect::<Vec<_>>(),
+                vertices.iter().map(|e| (e.x(), e.y())).collect::<Vec<_>>(),
             ),
             vec![],
         );
@@ -176,12 +185,7 @@ impl PolygonMap {
             .rasterize(&polygon)
             .expect("There should be no NaN of infinite values");
 
-        let cells = rasterizer.finish().map(|e| match e {
-            true => LocationType::Unexplored,
-            false => LocationType::OutOfMap,
-        });
-
-        (cells, offset)
+        (rasterizer.finish(), offset)
     }
 
     pub fn vertices(&self) -> &Vec<RealWorldLocation> {
