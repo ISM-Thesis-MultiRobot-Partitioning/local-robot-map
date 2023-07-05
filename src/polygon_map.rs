@@ -3,8 +3,8 @@ use geo_rasterize::BinaryBuilder;
 use num::ToPrimitive;
 
 use crate::cell_map::CellMap;
-use crate::coords::{AxisResolution, Coords};
-use crate::{LocationType, MapStateMatrix, RealWorldLocation};
+use crate::coords::{AxisResolution, Coords, InternalLocation};
+use crate::{Location, LocationType, RealWorldLocation};
 
 /// Describe a map using a polygon.
 ///
@@ -116,13 +116,47 @@ impl PolygonMap {
             true => LocationType::Unexplored,
             false => LocationType::OutOfMap,
         });
+        let mut cellmap = CellMap::from_raster(cells, resolution, offset);
 
-        // Set already-explored `cells`
-        if let Some(explored) = self.explored {
-            todo!()
+        // Set already-explored cells in `cellmap`
+        if let Some(explored) = &self.explored {
+            for polygon in explored {
+                let (cells_explored, offset_explored) =
+                    self.rasterize_polygon(polygon, &resolution);
+                let explored_locations: Vec<RealWorldLocation> = cells_explored
+                    .indexed_iter()
+                    .filter(|((_, _), e)| **e)
+                    .map(|((row, col), _)| {
+                        InternalLocation::new(
+                            Coords::new(
+                                col.to_f64().expect(
+                                    "No overflow converting usize to f64",
+                                ),
+                                row.to_f64().expect(
+                                    "No overflow converting usize to f64",
+                                ),
+                                0.0,
+                            ),
+                            offset_explored,
+                            resolution,
+                        )
+                        .expect(
+                            "indexed_iter() will not return negative indexes",
+                        )
+                        .into_real_world()
+                    })
+                    .filter(|location| cellmap.get_location(location).is_ok())
+                    .collect();
+
+                for loc in &explored_locations {
+                    cellmap
+                        .set_location(loc, LocationType::Explored)
+                        .expect("Invalid locations were filtered out");
+                }
+            }
         }
 
-        CellMap::from_raster(cells, resolution, offset)
+        cellmap
     }
 
     /// Internal helper function to convert the polygon to a corresponding
