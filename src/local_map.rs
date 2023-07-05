@@ -1014,15 +1014,12 @@ mod tests {
         );
 
         // set dummy algorithm for the test
-        fn algorithm(
-            map: LocalMap<CellMap, ()>,
-        ) -> LocalMap<CellMap, ()> {
+        fn algorithm(map: LocalMap<CellMap, ()>) -> LocalMap<CellMap, ()> {
             map
         }
 
-        let _partitioned_map = lmap
-            .partition(algorithm)
-            .expect("No error partitioning");
+        let _partitioned_map =
+            lmap.partition(algorithm).expect("No error partitioning");
         let map_algorithm = algorithm;
         // function pointer equality: https://stackoverflow.com/a/57834304
         assert_eq!(map_algorithm as usize, algorithm as usize);

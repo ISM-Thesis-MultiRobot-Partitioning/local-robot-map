@@ -30,17 +30,74 @@ use crate::{LocationType, MapStateMatrix, RealWorldLocation};
 /// );
 /// ```
 pub struct PolygonMap {
+    /// Vertices of the polygon describing the region to be explored.
     vertices: Vec<RealWorldLocation>,
+    /// List of vertices describing polygons of the already explored regions.
+    explored: Option<Vec<Vec<RealWorldLocation>>>,
 }
 
 impl PolygonMap {
+    /// Create a new and empty polygon map.
+    ///
+    /// It is important to note here, that the here map is **empty** and
+    /// is intended to contain nothing other than the specified polygon
+    /// indicating the region to be explored.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the polygon has not enough
+    /// vertices (strictly less than 3 vertices) and thus describes an invalid
+    /// polygon.
     pub fn new(
         vertices: Vec<RealWorldLocation>,
     ) -> Result<Self, PolygonMapError> {
+        Ok(Self {
+            vertices: Self::verify_polygon(vertices)?,
+            explored: None,
+        })
+    }
+
+    /// Same as [`PolygonMap::new`], but also sets *already explored* regions.
+    ///
+    /// # Errors
+    ///
+    /// Same errors as [`PolygonMap::new`].
+    pub fn new_explored(
+        vertices: Vec<RealWorldLocation>,
+        explored: Option<Vec<Vec<RealWorldLocation>>>,
+    ) -> Result<Self, PolygonMapError> {
+        // TODO: find a better way to make this check in-place when creating the
+        // struct? The [`Self::verify_polygon`] function was made such that it
+        // returns the polygon itself for this particular situation, in case
+        // there was no error. The issue with using `.map()` is that a
+        // `return` inside the closure will not return from the parent
+        // function. Also the following expression (equally with a `match`) will
+        // partially move the value, hence a clone is necessary.
+        if let Some(e) = explored.clone() {
+            for polygon in e {
+                Self::verify_polygon(polygon)?;
+            }
+        }
+
+        Ok(Self {
+            vertices: Self::verify_polygon(vertices)?,
+            explored,
+        })
+    }
+
+    /// Internal function to verify validity of a polygon.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the polygon has too few vertices
+    /// (less than 3) to describe a valid shape.
+    fn verify_polygon(
+        vertices: Vec<RealWorldLocation>,
+    ) -> Result<Vec<RealWorldLocation>, PolygonMapError> {
         if vertices.len() < 3 {
             Err(PolygonMapError::NotEnoughVertices)
         } else {
-            Ok(Self { vertices })
+            Ok(vertices)
         }
     }
 
